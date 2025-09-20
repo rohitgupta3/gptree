@@ -17,15 +17,6 @@ interface FirebaseUser {
   claims: Record<string, any>;
 }
 
-const handleLogout = async () => {
-  try {
-    await signOut(auth);
-    console.log("User signed out");
-  } catch (err) {
-    console.error("Logout error:", err);
-  }
-};
-
 function Home() {
   const [userData, setUserData] = useState<FirebaseUser | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -113,7 +104,15 @@ function Home() {
 }
 
 function App() {
-  // debugger;
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("User signed out");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
       {/* Auth buttons in top right */}
