@@ -1,43 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
-interface StatusResponse {
-  success: boolean;
-  message?: string;
+interface UserData {
+  userId: string;
 }
 
 function App() {
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [count, setCount] = useState(0);
-  const [status, setStatus] = useState<string>("Not tested");
+  const [status, setStatus] = useState<string>("Not hydrated");
   const [loading, setLoading] = useState(false);
 
-  const testBackendConnection = async () => {
+  useEffect(() => {
+    console.log("run once");
+  }, []);
+
+  const fetchUser = async () => {
     setLoading(true);
-    setStatus("Testing...");
+    setStatus("Fetching...");
 
     try {
       // Use relative URL - will work both locally and on Heroku
-      const response = await fetch(`${apiHost}/api/test`);
+      // const response = await fetch(`${apiHost}/api/test`);
+      const response = await fetch(`${apiHost}/api/user/random`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: StatusResponse = await response.json();
-
-      if (data.success) {
-        setStatus(`✅ Connected! ${data.message || ""}`);
-      } else {
-        setStatus("❌ Backend returned error");
-      }
+      const data: UserData = await response.json();
+      setUserData(data);
     } catch (error) {
-      console.error("Connection test failed:", error);
+      console.error("DB failed:", error);
       setStatus(
-        `❌ Connection failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
+        `Failure: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     } finally {
       setLoading(false);
@@ -52,9 +50,18 @@ function App() {
           count tester ({count})
         </button>
 
+        {userData && (
+          <div className="user-info">
+            <h2>User Information</h2>
+            <p>
+              <strong>User ID:</strong> {userData.userId}
+            </p>
+          </div>
+        )}
+
         <div style={{ marginTop: "20px" }}>
           <button
-            onClick={testBackendConnection}
+            onClick={fetchUser}
             disabled={loading}
             style={{
               padding: "10px 20px",
