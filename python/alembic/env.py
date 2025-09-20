@@ -1,5 +1,6 @@
 import importlib
 from logging.config import fileConfig
+import os
 import pkgutil
 
 from sqlalchemy import engine_from_config
@@ -48,6 +49,13 @@ target_metadata = [MAIN]
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+section = config.config_ini_section
+config.set_section_option(section, "DB_USER", os.environ.get("DB_USER"))
+config.set_section_option(section, "DB_PASSWORD", os.environ.get("DB_PASSWORD"))
+config.set_section_option(section, "DB_HOST", os.environ.get("DB_HOST"))
+config.set_section_option(section, "DB_PORT", os.environ.get("DB_PORT"))
+config.set_section_option(section, "DB_DATABASE", os.environ.get("DB_DATABASE"))
 
 
 def run_migrations_offline() -> None:
