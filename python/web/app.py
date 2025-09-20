@@ -1,8 +1,9 @@
-print("Starting app")
+import os
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session
 from pydantic import BaseModel
 from uuid import UUID
@@ -10,19 +11,25 @@ from uuid import UUID
 from models.user import User
 from web.database import get_session
 
+
 app = FastAPI(title="Simple User Project API")
 
-# Add CORS middleware to allow requests from the frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Default Vite dev server
+    allow_origins=[
+        "http://localhost:5173",  # Vite dev server
+        "https://gptree-62f38493fe71.herokuapp.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Response model for user data
+
 class UserDataResponse(BaseModel):
     user_id: str
 
@@ -34,15 +41,32 @@ def get_status():
 
 @app.get("/api/user/{user_id}", response_model=UserDataResponse)
 def get_user(user_id: str, session: Session = Depends(get_session)):
-    # Validate user_id as UUID
     try:
         user_uuid = UUID(user_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
 
-    # Get user from the DB
     user = session.get(User, user_uuid)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     return UserDataResponse(user_id=str(user.id))
+
+
+@app.get("/{full_path:path}")
+def serve_spa(full_path: str):
+    """Serve the frontend SPA for all routes that don't match API endpoints"""
+
+    # Don't serve SPA for API routes or static files
+    if full_path.startswith("api/") or full_path.startswith("static/"):
+        raise HTTPException(status_code=404, detail="Not found")
+
+    # Check if static directory exists
+    if not os.path.exists(static_dir):
+        raise HTTPException(status_code=404, detail="Frontend not built")
+
+    index_file = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
+
+    raise HTTPException(status_code=404, detail="Frontend not built")
