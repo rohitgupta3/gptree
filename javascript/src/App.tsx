@@ -19,7 +19,7 @@ function App() {
 
     try {
       // Use relative URL - will work both locally and on Heroku
-      const response = await fetch('/api/test')
+      const response = await fetch(`${apiHost}/api/test`)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
