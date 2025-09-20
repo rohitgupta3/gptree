@@ -4,7 +4,7 @@ import "./App.css";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import { auth } from "./config/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
@@ -16,6 +16,15 @@ interface FirebaseUser {
   email_verified?: boolean;
   claims: Record<string, any>;
 }
+
+const handleLogout = async () => {
+  try {
+    await signOut(auth);
+    console.log("User signed out");
+  } catch (err) {
+    console.error("Logout error:", err);
+  }
+};
 
 function Home() {
   const [userData, setUserData] = useState<FirebaseUser | null>(null);
@@ -104,6 +113,7 @@ function Home() {
 }
 
 function App() {
+  // debugger;
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
       {/* Auth buttons in top right */}
@@ -117,32 +127,51 @@ function App() {
           gap: "10px",
         }}
       >
-        <Link
-          to="/login"
-          style={{
-            backgroundColor: "#6c757d",
-            color: "white",
-            padding: "8px 16px",
-            textDecoration: "none",
-            borderRadius: "4px",
-            fontSize: "14px",
-          }}
-        >
-          Login
-        </Link>
-        <Link
-          to="/signup"
-          style={{
-            backgroundColor: "#007bff",
-            color: "white",
-            padding: "8px 16px",
-            textDecoration: "none",
-            borderRadius: "4px",
-            fontSize: "14px",
-          }}
-        >
-          Sign Up
-        </Link>
+        {auth.currentUser ? (
+          <button
+            onClick={handleLogout}
+            style={{
+              backgroundColor: "#dc3545",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Logout
+          </button>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              style={{
+                backgroundColor: "#6c757d",
+                color: "white",
+                padding: "8px 16px",
+                textDecoration: "none",
+                borderRadius: "4px",
+                fontSize: "14px",
+              }}
+            >
+              Login
+            </Link>
+            <Link
+              to="/signup"
+              style={{
+                backgroundColor: "#007bff",
+                color: "white",
+                padding: "8px 16px",
+                textDecoration: "none",
+                borderRadius: "4px",
+                fontSize: "14px",
+              }}
+            >
+              Sign Up
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Routes */}
