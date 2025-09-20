@@ -31,11 +31,12 @@ function Home() {
         setLoading(true);
         const token = await user.getIdToken();
 
-        const response = await fetch(`${apiHost}/api/user`, {
+        const response = await fetch(`${apiHost}/api/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+        console.log(response);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

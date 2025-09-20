@@ -146,6 +146,7 @@ def test_connection():
 
 @app.get("/api/me", response_model=CurrentUser)
 async def read_me(user: CurrentUser = Depends(get_current_user)):
+    print(user)
     return user
 
 
