@@ -93,11 +93,13 @@ function App() {
         </Link>
       </div>
 
-      {/* Routes */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
-      </Routes>
+      {/* Routes - add padding to avoid overlap with sign up button */}
+      <div style={{ paddingTop: "60px" }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </div>
     </div>
   );
 }
