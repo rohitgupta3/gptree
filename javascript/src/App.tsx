@@ -8,10 +8,6 @@ import { onAuthStateChanged } from "firebase/auth";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
-interface UserData {
-  user_id: string;
-}
-
 interface FirebaseUser {
   uid: string;
   email?: string;
@@ -22,7 +18,6 @@ interface FirebaseUser {
 }
 
 function Home() {
-  // const [userData, setUserData] = useState<UserData | null>(null);
   const [userData, setUserData] = useState<FirebaseUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState(0);
@@ -52,7 +47,6 @@ function Home() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // const data: UserData = await response.json();
         const data: FirebaseUser = await response.json();
         setUserData(data);
       } catch (error) {
