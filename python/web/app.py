@@ -56,6 +56,11 @@ class CurrentUser(BaseModel):
     claims: dict[str, Any] = {}
 
 
+class CreateUserRequest(BaseModel):
+    uid: str
+    email: str
+
+
 def verify_firebase_token(token: str) -> dict[str, Any]:
     try:
         return fb_auth.verify_id_token(token)
@@ -170,6 +175,20 @@ def get_user(user_id: str, session: Session = Depends(get_session)):
     user = session.get(User, user_uuid)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    return UserDataResponse(user_id=str(user.id))
+
+
+@app.post("/api/user", response_model=UserDataResponse)
+def create_user(payload: CreateUserRequest, session: Session = Depends(get_session)):
+    existing_user = session.exec(select(User).where(User.uid == payload.uid)).first()
+    if existing_user:
+        return UserDataResponse(user_id=str(existing_user.id))
+
+    user = User(uid=payload.uid, email=payload.email)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
 
     return UserDataResponse(user_id=str(user.id))
 

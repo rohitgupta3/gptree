@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 
 function Signup() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,10 +17,32 @@ function Signup() {
     setError("");
 
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up
+      .then(async (userCredential) => {
         const user = userCredential.user;
         console.log("User created in Firebase:", user);
+        const token = await user.getIdToken();
+
+        const response = await fetch(
+          `${import.meta.env.VITE_API_HOST}/api/user`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              uid: user.uid,
+              email: user.email,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to create user in backend");
+        }
+
+        // Redirect to Home
+        navigate("/");
       })
       .catch((error) => {
         const errorCode = error.code;

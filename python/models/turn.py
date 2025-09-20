@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Column
 from sqlalchemy import DateTime, func
@@ -17,7 +17,7 @@ class Turn(SQLModel, table=True):
             primary_key=True,
             server_default=sqlalchemy.sql.text("gen_random_uuid()"),
         ),
-        default_factory=uuid.uuid4,
+        default_factory=uuid4,
     )
 
     created_at: datetime = Field(
