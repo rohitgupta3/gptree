@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import "./App.css";
-import Signup from "./components/Signup.tsx";
+import Signup from "./components/Signup";
+import Login from "./components/Login";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
@@ -69,15 +70,30 @@ function Home() {
 function App() {
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
-      {/* Sign up button in top right */}
+      {/* Auth buttons in top right */}
       <div
         style={{
           position: "absolute",
           top: "20px",
           right: "20px",
           zIndex: 1000,
+          display: "flex",
+          gap: "10px",
         }}
       >
+        <Link
+          to="/login"
+          style={{
+            backgroundColor: "#6c757d",
+            color: "white",
+            padding: "8px 16px",
+            textDecoration: "none",
+            borderRadius: "4px",
+            fontSize: "14px",
+          }}
+        >
+          Login
+        </Link>
         <Link
           to="/signup"
           style={{
@@ -93,10 +109,11 @@ function App() {
         </Link>
       </div>
 
-      {/* Routes - add padding to avoid overlap with sign up button */}
+      {/* Routes */}
       <div style={{ paddingTop: "60px" }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>
       </div>
