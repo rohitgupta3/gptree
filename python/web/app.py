@@ -50,24 +50,9 @@ def test_connection():
     return StatusResponse(success=True, message="Backend is working correctly!")
 
 
-# TODO: get rid of this
-# @app.get("/api/user/random", response_model=UserDataResponse)
-# def get_random_user(session: Session = Depends(get_session)):
-#     user = session.scalars(select(User)).one()
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-
-#     return UserDataResponse(user_id=str(user.id))
-
-
 @app.get("/api/user", response_model=UserDataResponse)
 # def get_current_user(session: Session = Depends(get_session)):
 def get_current_user(request: Request, session: Session = Depends(get_session)):
-    print("---- HEADERS ----")
-    for key, value in request.headers.items():
-        print(f"{key}: {value}")
-    print("-----------------")
-
     user = session.scalars(select(User)).one()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

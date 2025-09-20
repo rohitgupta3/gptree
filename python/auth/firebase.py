@@ -1,44 +1,39 @@
-import firebase_admin
-from firebase_admin import credentials, auth
-
-# cred = credentials.Certificate("path/to/serviceAccountKey.json")
-
-# Instead, base64 encoded the 'private_key' key in the JSON file, then following this logic:
-# const firebase_private_key_b64 = process.env.FIREBASE_PRIVATE_KEY_BASE64;
-# const firebase_private_key = Buffer.from(firebase_private_key_b64, 'base64').toString('utf8');
-
-# admin.initializeApp({
-#     credential: admin.credential.cert({
-#     "project_id": process.env.FIREBASE_PROJECT_ID,
-#     "private_key": firebase_private_key,
-#     "client_email": process.env.FIREBASE_CLIENT_EMAIL,
-#     }),
-#     databaseURL: process.env.FIREBASE_DATABASE_URL
-# });
-
-# Python version:
 import os
 import base64
+
+import firebase_admin
+from firebase_admin import credentials, auth
 
 # Decode the base64 private key
 firebase_private_key_b64 = os.environ["FIREBASE_PRIVATE_KEY_BASE64"]
 firebase_private_key = base64.b64decode(firebase_private_key_b64).decode("utf-8")
 
-# # Create credentials object
-# cred = credentials.Certificate({
-#     "project_id": os.environ['FIREBASE_PROJECT_ID'],
-#     "private_key": firebase_private_key,
-#     "client_email": os.environ['FIREBASE_CLIENT_EMAIL']
-# })
 
-# # Initialize the app
-# firebase_admin.initialize_app(cred, {
-#     'databaseURL': os.environ['FIREBASE_DATABASE_URL']
-# })
+def initialize_firebase_admin():
+    if not firebase_admin._apps:
+        private_key_b64 = os.environ["FIREBASE_PRIVATE_KEY_B64"]
+        private_key = base64.b64decode(private_key_b64).decode("utf-8")
+
+        cred_dict = {
+            "type": "service_account",
+            "project_id": os.environ["FIREBASE_PROJECT_ID"],
+            "private_key_id": os.environ.get("FIREBASE_PRIVATE_KEY_ID", "placeholder"),
+            "private_key": private_key,
+            "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
+            "client_id": os.environ.get("FIREBASE_CLIENT_ID", "placeholder"),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{os.environ['FIREBASE_CLIENT_EMAIL']}",
+        }
+
+        cred = credentials.Certificate(cred_dict)
+        firebase_admin.initialize_app(cred)
 
 
-firebase_admin.initialize_app(cred)
+# TODO: don't like how importing this module will run this side effect
+initialize_firebase_admin()
 
 
-def verify_token(id_token: str):
+def verify_token(id_token: str) -> dict:
     return auth.verify_id_token(id_token)
