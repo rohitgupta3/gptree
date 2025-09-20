@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import "./App.css";
-import Signup from "./components/Signup";
+import Signup from "./components/Signup.tsx";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
