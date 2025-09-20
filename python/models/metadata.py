@@ -1,3 +1,3 @@
 from sqlmodel import MetaData
 
-MAIN = MetaData()
+MAIN = MetaData(schema="main")
