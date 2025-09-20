@@ -6,6 +6,7 @@ import Login from "./components/Login";
 import { auth } from "./config/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
+// API host from .env
 const apiHost = import.meta.env.VITE_API_HOST;
 
 interface FirebaseUser {
@@ -17,57 +18,12 @@ interface FirebaseUser {
   claims: Record<string, any>;
 }
 
-function Home() {
-  const [userData, setUserData] = useState<FirebaseUser | null>(null);
-  const [error, setError] = useState<string | null>(null);
+function Home({ userData }: { userData: FirebaseUser | null }) {
   const [count, setCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // Set up Firebase auth state listener
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        console.log("User not logged in");
-        setUserData(null); // clear any existing user
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const token = await user.getIdToken();
-
-        const response = await fetch(`${apiHost}/api/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log(response);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data: FirebaseUser = await response.json();
-        setUserData(data);
-      } catch (error) {
-        console.error("Backend error:", error);
-        setError(
-          `Failure: ${error instanceof Error ? error.message : "Unknown error"}`
-        );
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   return (
     <>
       <h1>GPTree</h1>
-
-      {loading && <p>Loading...</p>}
-      {error && <p className="error">Error: {error}</p>}
 
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
@@ -104,10 +60,52 @@ function Home() {
 }
 
 function App() {
+  const [userData, setUserData] = useState<FirebaseUser | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Firebase auth listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        console.log("No user logged in");
+        setUserData(null);
+        setLoadingUser(false);
+        return;
+      }
+
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch(`${apiHost}/api/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data: FirebaseUser = await response.json();
+        setUserData(data);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch user data:", err);
+        setUserData(null);
+        setError("Failed to fetch user data");
+      } finally {
+        setLoadingUser(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      console.log("User signed out");
+      console.log("Signed out successfully");
+      setUserData(null);
     } catch (err) {
       console.error("Logout error:", err);
     }
@@ -115,7 +113,7 @@ function App() {
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
-      {/* Auth buttons in top right */}
+      {/* Auth buttons */}
       <div
         style={{
           position: "absolute",
@@ -126,7 +124,7 @@ function App() {
           gap: "10px",
         }}
       >
-        {auth.currentUser ? (
+        {userData ? (
           <button
             onClick={handleLogout}
             style={{
@@ -173,13 +171,20 @@ function App() {
         )}
       </div>
 
-      {/* Routes */}
+      {/* Main content */}
       <div style={{ paddingTop: "60px" }}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Routes>
+        {loadingUser && <p style={{ padding: "20px" }}>Loading user...</p>}
+        {error && (
+          <p style={{ padding: "20px", color: "red" }}>Error: {error}</p>
+        )}
+
+        {!loadingUser && (
+          <Routes>
+            <Route path="/" element={<Home userData={userData} />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
+        )}
       </div>
     </div>
   );
