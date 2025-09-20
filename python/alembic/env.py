@@ -26,7 +26,7 @@ def import_modules(package, recursive=True):
             import_modules(full_name)
 
 
-# Import all models recrusively under python/models
+# Import all models recursively under python/models
 import_modules("models")
 
 

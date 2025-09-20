@@ -1,5 +1,7 @@
 import base64
+import importlib
 import os
+import pkgutil
 from typing import Any
 
 from fastapi import FastAPI, Depends, HTTPException, Request, status
@@ -7,6 +9,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import inspect
 from sqlmodel import Session, select, SQLModel
 from pydantic import BaseModel
 from uuid import UUID
@@ -14,6 +17,7 @@ import firebase_admin
 from firebase_admin import auth as fb_auth, credentials
 
 
+from models.metadata import MAIN  # This is your MetaData(schema="main")
 from models.user import User
 from web.database import get_session
 
@@ -139,16 +143,44 @@ class StatusResponse(BaseModel):
     message: str
 
 
+## TODO: remove this, this is so maybe we get access to all the models for resetting the DB
+def import_modules(package, recursive=True):
+    """
+    Import all submodules of a module, recursively, including subpackages.
+    """
+    if isinstance(package, str):
+        package = importlib.import_module(package)
+    for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
+        if "." in name:
+            continue
+        full_name = package.__name__ + "." + name
+        importlib.import_module(full_name)
+        if recursive and is_pkg:
+            import_modules(full_name)
+
+
+# Import all models recrusively under python/models
+import_modules("models")
+
+
 # TODO: remove this
 @app.post("/api/reset-db", response_model=StatusResponse)
 def reset_database(session: Session = Depends(get_session)):
+    bind = session.get_bind()
+
     try:
-        # Drop all tables and recreate them
-        SQLModel.metadata.drop_all(bind=session.get_bind())
-        SQLModel.metadata.create_all(bind=session.get_bind())
-        return StatusResponse(success=True, message="Database reset successfully.")
+        with bind.begin() as conn:
+            MAIN.drop_all(bind=conn)
+            MAIN.create_all(bind=conn)
+
+            inspector = inspect(conn)
+            tables = inspector.get_table_names(schema="main")
+
+        return StatusResponse(
+            success=True, message=f"Reset successful. Tables now: {tables}"
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Reset failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Reset failed: {e}")
 
 
 @app.get("/status")
