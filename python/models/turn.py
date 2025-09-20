@@ -31,6 +31,7 @@ class Turn(SQLModel, table=True):
     parent_turn_id: UUID | None
     user_id: UUID
     human_text: str
+    model: str
     # TODO: other human input e.g. files, model, mode, style, etc
     # TODO: maybe put some validation on below being non-null once the LLM has returned
     bot_text: str | None
