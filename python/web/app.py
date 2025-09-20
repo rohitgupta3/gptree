@@ -2,6 +2,7 @@ print("Starting app")
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlmodel import Session
 from pydantic import BaseModel
 from uuid import UUID
@@ -24,6 +25,11 @@ app.add_middleware(
 # Response model for user data
 class UserDataResponse(BaseModel):
     user_id: str
+
+
+@app.get("/status")
+def get_status():
+    return JSONResponse(content={"success": True})
 
 
 @app.get("/api/user/{user_id}", response_model=UserDataResponse)
