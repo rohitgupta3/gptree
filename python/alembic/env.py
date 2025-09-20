@@ -1,9 +1,33 @@
+import importlib
 from logging.config import fileConfig
+import pkgutil
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
+from models.metadata import MAIN
+
+
+def import_modules(package, recursive=True):
+    """
+    Import all submodules of a module, recursively, including subpackages.
+    """
+    if isinstance(package, str):
+        package = importlib.import_module(package)
+    for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
+        if "." in name:
+            continue
+        full_name = package.__name__ + "." + name
+        importlib.import_module(full_name)
+        if recursive and is_pkg:
+            import_modules(full_name)
+
+
+# Import all models recrusively under python/models
+import_modules("models")
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,7 +42,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = [MAIN]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -64,9 +88,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
