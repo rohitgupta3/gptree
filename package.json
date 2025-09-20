@@ -1,7 +1,7 @@
 {
     "name": "gptree",
     "scripts": {
-        "build": "cd javascript && npm install && npm run build",
+        "build": "cd javascript && npm install --include=dev && npm run build",
         "heroku-postbuild": "npm run build"
     }
 }
