@@ -3,6 +3,8 @@ import { Routes, Route, Link } from "react-router-dom";
 import "./App.css";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
+import { auth } from "./config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
@@ -17,10 +19,23 @@ function Home() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    // Set up Firebase auth state listener
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        console.log("User not logged in");
+        setUserData(null); // clear any existing user
+        return;
+      }
+
       try {
         setLoading(true);
-        const response = await fetch(`${apiHost}/api/user/random`);
+        const token = await user.getIdToken();
+
+        const response = await fetch(`${apiHost}/api/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -29,16 +44,16 @@ function Home() {
         const data: UserData = await response.json();
         setUserData(data);
       } catch (error) {
-        console.error("DB failed:", error);
+        console.error("Backend error:", error);
         setError(
           `Failure: ${error instanceof Error ? error.message : "Unknown error"}`
         );
       } finally {
         setLoading(false);
       }
-    };
+    });
 
-    fetchUser();
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -46,7 +61,6 @@ function Home() {
       <h1>GPTree</h1>
 
       {loading && <p>Loading...</p>}
-
       {error && <p className="error">Error: {error}</p>}
 
       <div className="card">
