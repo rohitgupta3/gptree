@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import './App.css'
 
+const apiHost = import.meta.env.VITE_API_HOST;
+
 interface StatusResponse {
   success: boolean;
   message?: string;
