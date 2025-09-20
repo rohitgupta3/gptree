@@ -4,47 +4,51 @@ import "./App.css";
 const apiHost = import.meta.env.VITE_API_HOST;
 
 interface UserData {
-  userId: string;
+  user_id: string;
 }
 
 function App() {
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState(0);
-  const [status, setStatus] = useState<string>("Not hydrated");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     console.log("run once");
-  }, []);
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        // Use relative URL - will work both locally and on Heroku
+        // const response = await fetch(`${apiHost}/api/test`);
+        const response = await fetch(`${apiHost}/api/user/random`);
 
-  const fetchUser = async () => {
-    setLoading(true);
-    setStatus("Fetching...");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    try {
-      // Use relative URL - will work both locally and on Heroku
-      // const response = await fetch(`${apiHost}/api/test`);
-      const response = await fetch(`${apiHost}/api/user/random`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const data: UserData = await response.json();
+        setUserData(data);
+      } catch (error) {
+        console.error("DB failed:", error);
+        setError(
+          `Failure: ${error instanceof Error ? error.message : "Unknown error"}`
+        );
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data: UserData = await response.json();
-      setUserData(data);
-    } catch (error) {
-      console.error("DB failed:", error);
-      setStatus(
-        `Failure: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchUser();
+  }, []);
 
   return (
     <>
       <h1>GPTree</h1>
+
+      {loading && <p>Loading...</p>}
+
+      {error && <p className="error">Error: {error}</p>}
+
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count tester ({count})
@@ -54,41 +58,10 @@ function App() {
           <div className="user-info">
             <h2>User Information</h2>
             <p>
-              <strong>User ID:</strong> {userData.userId}
+              <strong>User ID:</strong> {userData.user_id}
             </p>
           </div>
         )}
-
-        <div style={{ marginTop: "20px" }}>
-          <button
-            onClick={fetchUser}
-            disabled={loading}
-            style={{
-              padding: "10px 20px",
-              marginBottom: "10px",
-              backgroundColor: loading ? "#ccc" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? "Testing..." : "Test Backend Connection"}
-          </button>
-
-          <div
-            style={{
-              padding: "10px",
-              marginTop: "10px",
-              backgroundColor: "#f8f9fa",
-              border: "1px solid #dee2e6",
-              borderRadius: "4px",
-              fontFamily: "monospace",
-            }}
-          >
-            Status: {status}
-          </div>
-        </div>
       </div>
     </>
   );

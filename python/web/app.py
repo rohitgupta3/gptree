@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlmodel import Session
+from sqlmodel import Session, select
 from pydantic import BaseModel
 from uuid import UUID
 
@@ -48,6 +48,16 @@ def get_status():
 def test_connection():
     """Simple test endpoint to verify frontend-backend communication"""
     return StatusResponse(success=True, message="Backend is working correctly!")
+
+
+# TODO: get rid of this
+@app.get("/api/user/random", response_model=UserDataResponse)
+def get_random_user(session: Session = Depends(get_session)):
+    user = session.scalars(select(User)).one()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return UserDataResponse(user_id=str(user.id))
 
 
 @app.get("/api/user/{user_id}", response_model=UserDataResponse)
