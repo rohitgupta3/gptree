@@ -1,0 +1,11 @@
+{
+    "name": "gptree",
+    "scripts": {
+        "build": "cd javascript && npm install && npm run build",
+        "heroku-postbuild": "npm run build"
+    },
+    "engines": {
+        "node": "18.x",
+        "npm": "9.x"
+    }
+}
