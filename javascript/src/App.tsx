@@ -12,8 +12,18 @@ interface UserData {
   user_id: string;
 }
 
+interface FirebaseUser {
+  uid: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+  email_verified?: boolean;
+  claims: Record<string, any>;
+}
+
 function Home() {
-  const [userData, setUserData] = useState<UserData | null>(null);
+  // const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<FirebaseUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -42,7 +52,8 @@ function Home() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data: UserData = await response.json();
+        // const data: UserData = await response.json();
+        const data: FirebaseUser = await response.json();
         setUserData(data);
       } catch (error) {
         console.error("Backend error:", error);
@@ -71,10 +82,26 @@ function Home() {
 
         {userData && (
           <div className="user-info">
-            <h2>User Information</h2>
+            <h2>User Info</h2>
             <p>
-              <strong>User ID:</strong> {userData.user_id}
+              <strong>UID:</strong> {userData.uid}
             </p>
+            {userData.email && (
+              <p>
+                <strong>Email:</strong> {userData.email}
+              </p>
+            )}
+            {userData.name && (
+              <p>
+                <strong>Name:</strong> {userData.name}
+              </p>
+            )}
+            {userData.picture && (
+              <p>
+                <strong>Picture:</strong>{" "}
+                <img src={userData.picture} alt="User" width="50" />
+              </p>
+            )}
           </div>
         )}
       </div>
