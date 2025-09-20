@@ -1,14 +1,34 @@
 import { useState, FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../config/firebase";
 
 function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    console.log("submitted!");
-    console.log({ email, password }); // Optional: also log the form data
+    setLoading(true);
+    setError("");
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        console.log("User created:", user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("Error:", errorCode, errorMessage);
+        setError(errorMessage);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -16,6 +36,21 @@ function Signup() {
       <h1>Sign Up</h1>
 
       <form onSubmit={handleSubmit}>
+        {error && (
+          <div
+            style={{
+              color: "red",
+              marginBottom: "15px",
+              padding: "10px",
+              backgroundColor: "#fee",
+              border: "1px solid #fcc",
+              borderRadius: "4px",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <div style={{ marginBottom: "15px" }}>
           <label
             htmlFor="email"
@@ -29,6 +64,7 @@ function Signup() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
             style={{
               width: "100%",
               padding: "8px",
@@ -51,6 +87,7 @@ function Signup() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
             style={{
               width: "100%",
               padding: "8px",
@@ -62,16 +99,17 @@ function Signup() {
 
         <button
           type="submit"
+          disabled={loading}
           style={{
-            backgroundColor: "#007bff",
+            backgroundColor: loading ? "#ccc" : "#007bff",
             color: "white",
             padding: "10px 20px",
             border: "none",
             borderRadius: "4px",
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          Submit
+          {loading ? "Creating Account..." : "Submit"}
         </button>
       </form>
 
