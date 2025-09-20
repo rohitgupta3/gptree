@@ -4,9 +4,8 @@ from sqlmodel import Session
 from pydantic import BaseModel
 from uuid import UUID
 
-from backend.web.database import get_session
-
 from models.user import User
+from web.database import get_session
 
 app = FastAPI(title="Simple User Project API")
 
