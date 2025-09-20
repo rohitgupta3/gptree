@@ -7,11 +7,12 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlmodel import Session, select
+from sqlmodel import Session, select, SQLModel
 from pydantic import BaseModel
 from uuid import UUID
 import firebase_admin
 from firebase_admin import auth as fb_auth, credentials
+
 
 from models.user import User
 from web.database import get_session
@@ -136,6 +137,18 @@ class UserDataResponse(BaseModel):
 class StatusResponse(BaseModel):
     success: bool
     message: str
+
+
+# TODO: remove this
+@app.post("/api/reset-db", response_model=StatusResponse)
+def reset_database(session: Session = Depends(get_session)):
+    try:
+        # Drop all tables and recreate them
+        SQLModel.metadata.drop_all(bind=session.get_bind())
+        SQLModel.metadata.create_all(bind=session.get_bind())
+        return StatusResponse(success=True, message="Database reset successfully.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reset failed: {str(e)}")
 
 
 @app.get("/status")

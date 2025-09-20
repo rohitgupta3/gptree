@@ -111,8 +111,51 @@ function App() {
     }
   };
 
+  const handleResetDatabase = async () => {
+    try {
+      const res = await fetch(`${apiHost}/api/reset-db`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Failed to reset DB");
+      }
+
+      const data = await res.json();
+      alert(data.message || "Database reset successfully!");
+    } catch (err: any) {
+      console.error("DB Reset Error:", err);
+      alert("Database reset failed: " + err.message);
+    }
+  };
+
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
+      <div
+        style={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          zIndex: 1000,
+        }}
+      >
+        <button
+          onClick={handleResetDatabase}
+          style={{
+            backgroundColor: "#ffc107",
+            color: "black",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+        >
+          Reset DB
+        </button>
+      </div>
+
       {/* Auth buttons */}
       <div
         style={{
