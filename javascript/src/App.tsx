@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { Routes, Route, Link } from "react-router-dom";
 import "./App.css";
+import Signup from "./components/Signup";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
@@ -7,19 +9,16 @@ interface UserData {
   user_id: string;
 }
 
-function App() {
+function Home() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log("run once");
     const fetchUser = async () => {
       try {
         setLoading(true);
-        // Use relative URL - will work both locally and on Heroku
-        // const response = await fetch(`${apiHost}/api/test`);
         const response = await fetch(`${apiHost}/api/user/random`);
 
         if (!response.ok) {
@@ -64,6 +63,42 @@ function App() {
         )}
       </div>
     </>
+  );
+}
+
+function App() {
+  return (
+    <div style={{ position: "relative", minHeight: "100vh" }}>
+      {/* Sign up button in top right */}
+      <div
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          zIndex: 1000,
+        }}
+      >
+        <Link
+          to="/signup"
+          style={{
+            backgroundColor: "#007bff",
+            color: "white",
+            padding: "8px 16px",
+            textDecoration: "none",
+            borderRadius: "4px",
+            fontSize: "14px",
+          }}
+        >
+          Sign Up
+        </Link>
+      </div>
+
+      {/* Routes */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+    </div>
   );
 }
 
