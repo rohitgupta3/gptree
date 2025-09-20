@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Column
 from sqlalchemy import DateTime, func
@@ -7,11 +7,11 @@ import sqlalchemy
 from models.metadata import MAIN
 
 
-class User(SQLModel, table=True):
+class Turn(SQLModel, table=True):
     metadata = MAIN
-    __tablename__ = "user"
+    __tablename__ = "turn"
 
-    id: uuid.UUID = Field(
+    id: UUID = Field(
         sa_column=Column(
             UUIDType,
             primary_key=True,
@@ -28,6 +28,11 @@ class User(SQLModel, table=True):
         )
     )
 
-    uid: str
-    email: str
-    # TODO: name, etc
+    parent_turn_id: UUID | None
+    user_id: UUID
+    human_text: str
+    # TODO: other human input e.g. files, model, mode, style, etc
+    # TODO: maybe put some validation on below being non-null once the LLM has returned
+    bot_text: str | None
+    # TODO: other bot input
+    # TODO: llm_request_id once that is set up

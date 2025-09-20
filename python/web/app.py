@@ -49,7 +49,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 class CurrentUser(BaseModel):
     uid: str
-    email: str | None = None
+    email: str
     name: str | None = None
     picture: str | None = None
     email_verified: bool | None = None

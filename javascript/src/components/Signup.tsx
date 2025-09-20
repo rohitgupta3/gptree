@@ -18,7 +18,7 @@ function Signup() {
       .then((userCredential) => {
         // Signed up
         const user = userCredential.user;
-        console.log("User created:", user);
+        console.log("User created in Firebase:", user);
       })
       .catch((error) => {
         const errorCode = error.code;
