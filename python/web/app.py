@@ -34,9 +34,20 @@ class UserDataResponse(BaseModel):
     user_id: str
 
 
+class StatusResponse(BaseModel):
+    success: bool
+    message: str
+
+
 @app.get("/status")
 def get_status():
     return JSONResponse(content={"success": True})
+
+
+@app.get("/api/test", response_model=StatusResponse)
+def test_connection():
+    """Simple test endpoint to verify frontend-backend communication"""
+    return StatusResponse(success=True, message="Backend is working correctly!")
 
 
 @app.get("/api/user/{user_id}", response_model=UserDataResponse)
