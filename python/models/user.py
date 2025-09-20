@@ -28,4 +28,5 @@ class User(SQLModel, table=True):
         )
     )
 
-    # TODO: name, etc
+    first_name: str
+    last_name: str | None
