@@ -74,3 +74,10 @@ def seed_turns(session: Session, user_id: UUID):
             prev_turn_by_column[col_idx] = turn
 
     session.commit()
+
+
+if __name__ == "__main__":
+    from database.database import engine
+
+    with Session(engine) as session:
+        seed_turns(session, user_id=UUID("a0afda00-2249-4c09-92dd-d0888468a47a"))
