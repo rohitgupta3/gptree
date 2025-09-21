@@ -35,16 +35,12 @@ def get_full_conversation_from_turn_id(session: Session, turn_id: UUID) -> list[
 
     earlier = [current]
 
-    # visited_ids = {current.id}
     while current.parent_id:
         current = session.get(Turn, current.parent_id)
-        # visited_ids.add(current.id)
         earlier = [current, *earlier]
 
-    breakpoint()
-
     # Traverse down primary_child_id path as long as it's part of the original lineage
-    ordered_turns = []
+    # TODO: this is inelegant
     current = session.get(Turn, turn_id)
     if not current.primary_child_id:
         return earlier

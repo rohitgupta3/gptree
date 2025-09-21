@@ -80,9 +80,10 @@ def test_full_conversation_from_identifying_turn_id(db_session: Session):
     identifying_turn = db_session.exec(stmt).one()
 
     # Import function under test
-    from web.dao.conversations import get_full_conversation_from_turn_id
 
-    full_convo = get_full_conversation_from_turn_id(db_session, identifying_turn.id)
+    full_convo = conversations.get_full_conversation_from_turn_id(
+        db_session, identifying_turn.id
+    )
 
     # Assert expected sequence
     expected_texts = [
