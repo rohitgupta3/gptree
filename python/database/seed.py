@@ -2,7 +2,7 @@ from sqlmodel import Session, select, delete
 from uuid import uuid4, UUID
 from models.user import User
 from models.turn import Turn  # Adjust if Turn is elsewhere
-from datetime import datetime
+import datetime
 from typing import Optional
 
 
@@ -54,6 +54,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
         parent_id=None,
         primary_child_id=None,
         branched_child_ids=[],
+        created_at=datetime.datetime.now(datetime.UTC),
     )
     purple_2_turn = Turn(
         user_id=user_id,
@@ -64,6 +65,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
         parent_id=None,
         primary_child_id=None,
         branched_child_ids=[],
+        created_at=datetime.datetime.now(datetime.UTC),
     )
     blue_1_turn = Turn(
         user_id=user_id,
@@ -74,6 +76,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
         parent_id=None,
         primary_child_id=None,
         branched_child_ids=[],
+        created_at=datetime.datetime.now(datetime.UTC),
     )
     blue_2_turn = Turn(
         user_id=user_id,
@@ -84,6 +87,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
         parent_id=None,
         primary_child_id=None,
         branched_child_ids=[],
+        created_at=datetime.datetime.now(datetime.UTC),
     )
     blue_3_turn = Turn(
         user_id=user_id,
@@ -94,6 +98,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
         parent_id=None,
         primary_child_id=None,
         branched_child_ids=[],
+        created_at=datetime.datetime.now(datetime.UTC),
     )
     green_1_turn = Turn(
         user_id=user_id,
@@ -104,6 +109,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
         parent_id=None,
         primary_child_id=None,
         branched_child_ids=[],
+        created_at=datetime.datetime.now(datetime.UTC),
     )
     session.add_all(
         [
