@@ -3,9 +3,10 @@ import os
 
 import firebase_admin
 from firebase_admin import auth as fb_auth, credentials
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from database import engine
+from models.user import User
 
 # TODO: extract Firebase auth
 
@@ -42,11 +43,9 @@ def print_firebase_users(session: Session) -> tuple[int, int]:
     Fetch all users from Firebase and sync them to the database.
     Returns tuple of (users_added, users_updated)
     """
-    breakpoint()
     try:
         # Get all users from Firebase (paginated)
         page = fb_auth.list_users()
-        breakpoint()
         firebase_users = []
 
         while page:
@@ -56,37 +55,28 @@ def print_firebase_users(session: Session) -> tuple[int, int]:
         # Process each Firebase user
         for fb_user in firebase_users:
             print(fb_user.email)
-        #     # Skip users without email (shouldn't happen in most cases)
-        #     if not fb_user.email:
-        #         continue
+            if not fb_user.email:
+                raise ValueError(f"{fb_user} doesn't have an email?")
 
-        #     # Check if user already exists in DB
-        #     existing_user = session.exec(
-        #         session.query(User).filter(User.uid == fb_user.uid)
-        #     ).first()
+            # Check if user already exists in DB. TODO: should be `one`?
+            existing_user = session.exec(
+                select(User).where(User.uid == fb_user.uid)
+            ).one_or_none()
 
-        #     if existing_user:
-        #         # Update existing user if email changed
-        #         if existing_user.email != fb_user.email:
-        #             existing_user.email = fb_user.email
-        #             session.add(existing_user)
-        #             users_updated += 1
-        #     else:
-        #         # Create new user
-        #         new_user = User(uid=fb_user.uid, email=fb_user.email)
-        #         session.add(new_user)
-        #         users_added += 1
+            if existing_user:
+                print(f"Already have user with uid {fb_user.uid}")
+            else:
+                # Create new user
+                new_user = User(uid=fb_user.uid, email=fb_user.email)
+                session.add(new_user)
 
-        # session.commit()
+        session.commit()
 
     except Exception as e:
-        pass
-        # session.rollback()
-        # raise HTTPException(
-        #     status_code=500, detail=f"Failed to sync Firebase users: {str(e)}"
-        # )
+        print(f"Exception hit, rolling back: {e}")
+        session.rollback()
 
 
 if __name__ == "__main__":
     with Session(engine) as session:
-        print_firebase_users(None)
+        print_firebase_users(session)
