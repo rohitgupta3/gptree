@@ -48,9 +48,9 @@ def test_separable_conversation(db_session: Session):
     db_session.commit()
 
     seed.seed_turns(db_session, user.id)
-    separable_conversations = conversations.get_separable_conversations(db_session)
-    # breakpoint()
-    # pass
+    separable_conversations = conversations.get_separable_conversations(
+        db_session, user.id
+    )
     assert len(separable_conversations) == 3
 
     # TODO: hardcoded to same text in seed, a bit brittle
@@ -64,7 +64,3 @@ def test_separable_conversation(db_session: Session):
     assert sorted(expected_ids) == sorted(
         [conversation.id for conversation in separable_conversations]
     )
-    # expected_titles = [
-    #     "Explain BJT",
-
-    # ]
