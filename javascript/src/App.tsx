@@ -126,7 +126,7 @@ function Home({
                   cols={50}
                   style={{
                     width: "100%",
-                    maxWidth: "700px", // Increased from 500px
+                    maxWidth: "700px",
                     padding: "10px",
                     margin: "10px 0",
                     borderRadius: "4px",
@@ -491,63 +491,6 @@ function App() {
     }
   };
 
-  const handleResetDatabase = async () => {
-    try {
-      const res = await fetch(`${apiHost}/api/reset-db`, {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || "Failed to reset DB");
-      }
-
-      const data = await res.json();
-      alert(data.message || "Database reset successfully!");
-    } catch (err: any) {
-      console.error("DB Reset Error:", err);
-      alert("Database reset failed: " + err.message);
-    }
-  };
-
-  const handleResetTestDatabase = async () => {
-    try {
-      const res = await fetch(`${apiHost}/api/reset-test-db`, {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || "Failed to reset test DB");
-      }
-
-      const data = await res.json();
-      alert(data.message || "Test database reset successfully!");
-    } catch (err: any) {
-      console.error("Test DB Reset Error:", err);
-      alert("Test database reset failed: " + err.message);
-    }
-  };
-
-  const handleSeedUsers = async () => {
-    try {
-      const res = await fetch(`${apiHost}/api/seed-users`, {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || "Failed to seed users");
-      }
-
-      const data = await res.json();
-      alert(data.message || "Users seeded successfully!");
-    } catch (err: any) {
-      console.error("Seed Users Error:", err);
-      alert("Seed users failed: " + err.message);
-    }
-  };
-
   const buttonStyle = {
     backgroundColor: "#6c757d",
     color: "white",
@@ -583,26 +526,6 @@ function App() {
         <Link to="/" style={buttonStyle}>
           Home
         </Link>
-
-        {/* Center: Admin buttons (positioned to the right of sidebar) */}
-        <div
-          style={{
-            position: "absolute",
-            left: "270px", // 250px sidebar width + 20px margin
-            display: "flex",
-            gap: "10px",
-          }}
-        >
-          <button onClick={handleResetDatabase} style={buttonStyle}>
-            Reset DB
-          </button>
-          <button onClick={handleResetTestDatabase} style={buttonStyle}>
-            Reset test DB
-          </button>
-          <button onClick={handleSeedUsers} style={buttonStyle}>
-            Seed Users
-          </button>
-        </div>
 
         {/* Right: Auth buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
