@@ -25,3 +25,27 @@ def get_separable_conversations(session: Session, user_id: UUID) -> list[Turn]:
     )
 
     return session.exec(stmt).all()
+
+
+def get_full_conversation_from_turn_id(session: Session, turn_id: UUID) -> list[Turn]:
+    # Traverse up to root
+    # turn_by_id = {}
+    current = session.get(Turn, turn_id)
+    if not current:
+        return []
+
+    while current.parent_id:
+        current = session.get(Turn, current.parent_id)
+
+    root = current
+
+    # Traverse down through primary_child_id
+    ordered_turns = []
+    current = root
+    while current:
+        ordered_turns.append(current)
+        if not current.primary_child_id:
+            break
+        current = session.get(Turn, current.primary_child_id)
+
+    return ordered_turns
