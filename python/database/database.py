@@ -6,9 +6,7 @@ from sqlmodel import create_engine, Session
 
 from models.metadata import MAIN
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/simple_app"
-)
+DATABASE_URL = os.environ["DATABASE_URL"]
 
 # Fix for PostgreSQL URLs from Heroku
 if DATABASE_URL.startswith("postgres://"):

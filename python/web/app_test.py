@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest.mock import patch, Mock
 
@@ -11,13 +12,21 @@ from models.user import User
 from models.turn import Turn
 
 # SQLite test database
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+# SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+# engine = create_engine(
+#     SQLALCHEMY_DATABASE_URL,
+#     connect_args={"check_same_thread": False},
+#     poolclass=StaticPool,
+# )
 
+
+DATABASE_URL = os.environ["TEST_DATABASE_URL"]
+
+# Fix for PostgreSQL URLs from Heroku
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(DATABASE_URL)
 
 create_all_tables(engine)
 
