@@ -44,58 +44,6 @@ def import_modules(package, recursive=True):
 import_modules("models")
 
 
-# def sync_firebase_users_to_db(session: Session) -> tuple[int, int]:
-#     """
-#     Fetch all users from Firebase and sync them to the database.
-#     Returns tuple of (users_added, users_updated)
-#     """
-#     users_added = 0
-#     users_updated = 0
-
-#     try:
-#         # Get all users from Firebase (paginated)
-#         page = fb_auth.list_users()
-#         firebase_users = []
-
-#         while page:
-#             firebase_users.extend(page.users)
-#             page = page.get_next_page() if page.has_next_page else None
-
-#         # Process each Firebase user
-#         for fb_user in firebase_users:
-#             # Skip users without email (shouldn't happen in most cases)
-#             if not fb_user.email:
-#                 continue
-
-#             # Check if user already exists in DB
-#             existing_user = session.exec(
-#                 session.query(User).filter(User.uid == fb_user.uid)
-#             ).first()
-
-#             if existing_user:
-#                 # Update existing user if email changed
-#                 if existing_user.email != fb_user.email:
-#                     existing_user.email = fb_user.email
-#                     session.add(existing_user)
-#                     users_updated += 1
-#             else:
-#                 # Create new user
-#                 new_user = User(uid=fb_user.uid, email=fb_user.email)
-#                 session.add(new_user)
-#                 users_added += 1
-
-#         session.commit()
-
-#     except Exception as e:
-#         session.rollback()
-#         raise HTTPException(
-#             status_code=500, detail=f"Failed to sync Firebase users: {str(e)}"
-#         )
-
-
-#     return users_added, users_updated
-
-
 def seed_user(session: Session) -> bool:
     """
     Fetch all users from Firebase and sync them to the database.
