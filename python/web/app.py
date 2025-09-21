@@ -116,7 +116,7 @@ async def create_conversation(
         user_id=user.id,
         human_text=payload.text,
         parent_id=None,  # This is the root turn of a new conversation
-        title=f"New {payload.text[:20]}",  # TODO: fix
+        title=f"{payload.text[:20]}",  # TODO: fix
         model="gemini-2.5-flash",
         bot_text=None,  # Will be filled by the stub function
     )

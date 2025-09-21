@@ -36,7 +36,13 @@ interface Turn {
   created_at: string;
 }
 
-function Home({ userData }: { userData: FirebaseUser | null }) {
+function Home({
+  userData,
+  onNewConversation,
+}: {
+  userData: FirebaseUser | null;
+  onNewConversation?: () => void;
+}) {
   const [count, setCount] = useState(0);
   const [conversationText, setConversationText] = useState("");
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
@@ -80,6 +86,9 @@ function Home({ userData }: { userData: FirebaseUser | null }) {
       // Redirect to chat/{conversation_UUID}/{turn_UUID}
       // Since this is the first turn, conversation_UUID and turn_UUID are the same
       navigate(`/chat/${data.turn_id}`);
+      if (onNewConversation) {
+        onNewConversation(); // ⬅ Trigger refresh of sidebar
+      }
     } catch (error) {
       console.error("Error creating conversation:", error);
       alert(
@@ -355,6 +364,39 @@ function App() {
     string | null
   >(null);
 
+  const fetchConversations = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      const token = await user.getIdToken();
+
+      const response = await fetch(`${apiHost}/api/conversations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data: ConversationListItem[] = await response.json();
+
+      // Sort client-side by created_at DESC
+      const sorted = data.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setConversations(sorted);
+      setConversationFetchError(null);
+    } catch (err) {
+      console.error("Failed to fetch conversations:", err);
+      setConversationFetchError("Failed to load conversations.");
+    }
+  };
+
   // Firebase auth listener
   // TODO: confirm this works if you manually clear cookies
   useEffect(() => {
@@ -394,39 +436,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const fetchConversations = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      try {
-        const token = await user.getIdToken();
-
-        const response = await fetch(`${apiHost}/api/conversations`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data: ConversationListItem[] = await response.json();
-
-        // Sort client-side by created_at DESC
-        const sorted = data.sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-
-        setConversations(sorted);
-        setConversationFetchError(null);
-      } catch (err) {
-        console.error("Failed to fetch conversations:", err);
-        setConversationFetchError("Failed to load conversations.");
-      }
-    };
-
     if (userData) {
       fetchConversations();
     }
@@ -662,7 +671,16 @@ function App() {
 
         {!loadingUser && (
           <Routes>
-            <Route path="/" element={<Home userData={userData} />} />
+            <Route
+              path="/"
+              element={
+                <Home
+                  userData={userData}
+                  onNewConversation={fetchConversations}
+                />
+              }
+            />
+
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/chat/:identifyingTurnId" element={<Chat />} />
