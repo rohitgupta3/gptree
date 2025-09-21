@@ -19,6 +19,13 @@ interface FirebaseUser {
   claims: Record<string, any>;
 }
 
+interface ConversationListItem {
+  root_turn_id: string;
+  identifying_turn_id: string;
+  title: string;
+  created_at: string; // ISO date string
+}
+
 function Home({ userData }: { userData: FirebaseUser | null }) {
   const [count, setCount] = useState(0);
   const [conversationText, setConversationText] = useState("");
@@ -193,6 +200,12 @@ function App() {
   const [userData, setUserData] = useState<FirebaseUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<ConversationListItem[]>(
+    []
+  );
+  const [conversationFetchError, setConversationFetchError] = useState<
+    string | null
+  >(null);
 
   // Firebase auth listener
   // TODO: confirm this works if you manually clear cookies
@@ -231,6 +244,45 @@ function App() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const token = await user.getIdToken();
+
+        const response = await fetch(`${apiHost}/api/conversations`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data: ConversationListItem[] = await response.json();
+
+        // Sort client-side by created_at DESC
+        const sorted = data.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+
+        setConversations(sorted);
+        setConversationFetchError(null);
+      } catch (err) {
+        console.error("Failed to fetch conversations:", err);
+        setConversationFetchError("Failed to load conversations.");
+      }
+    };
+
+    if (userData) {
+      fetchConversations();
+    }
+  }, [userData]);
 
   const handleLogout = async () => {
     try {
@@ -410,8 +462,45 @@ function App() {
         </div>
       </div>
 
+      {conversations.length > 0 && (
+        <div
+          style={{
+            position: "fixed",
+            top: "60px",
+            left: 0,
+            width: "250px",
+            height: "calc(100% - 60px)",
+            backgroundColor: "#f1f1f1",
+            padding: "20px",
+            overflowY: "auto",
+            borderRight: "1px solid #ccc",
+          }}
+        >
+          <h3>Conversations</h3>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {conversations.map((conv) => (
+              <li
+                key={conv.identifying_turn_id}
+                style={{ marginBottom: "10px" }}
+              >
+                <Link
+                  to={`/chat/${conv.root_turn_id}/${conv.identifying_turn_id}`}
+                >
+                  {conv.title || "Untitled"}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Main content */}
-      <div style={{ paddingTop: "60px" }}>
+      <div
+        style={{
+          paddingTop: "60px",
+          marginLeft: conversations.length > 0 ? "250px" : "0",
+        }}
+      >
         {loadingUser && <p style={{ padding: "20px" }}>Loading user...</p>}
         {error && (
           <p style={{ padding: "20px", color: "red" }}>Error: {error}</p>

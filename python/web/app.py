@@ -44,6 +44,13 @@ class UserDataResponse(BaseModel):
     user_id: str
 
 
+class ConversationListItem(BaseModel):
+    root_turn_id: UUID
+    identifying_turn_id: UUID
+    title: str
+    created_at: datetime.datetime
+
+
 app = FastAPI(title="Simple User Project API")
 
 
@@ -123,13 +130,6 @@ async def create_conversation(
         print(f"Error calling Gemini stub: {e}")
 
     return CreateConversationResponse(turn_id=turn_id)
-
-
-class ConversationListItem(BaseModel):
-    root_turn_id: UUID
-    identifying_turn_id: UUID
-    title: str
-    created_at: datetime.datetime
 
 
 @app.get("/api/conversations", response_model=list[ConversationListItem])
