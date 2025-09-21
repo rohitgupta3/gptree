@@ -49,6 +49,6 @@ def test_separable_conversation(db_session: Session):
 
     seed.seed_turns(db_session, user.id)
     separable_conversations = conversations.get_separable_conversations(db_session)
-    breakpoint()
-    pass
-    # assert len(separable_conversations) == 3
+    # breakpoint()
+    # pass
+    assert len(separable_conversations) == 3
