@@ -409,6 +409,7 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
 }
 
 function App() {
+  const navigate = useNavigate();
   const location = useLocation();
   const currentTurnId = location.pathname.startsWith("/chat/")
     ? location.pathname.split("/chat/")[1]
@@ -462,7 +463,6 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        console.log("No user logged in");
         setUserData(null);
         setLoadingUser(false);
         return;
@@ -506,6 +506,8 @@ function App() {
       await signOut(auth);
       console.log("Signed out successfully");
       setUserData(null);
+      setConversations([]); // clear sidebar
+      navigate("/"); // ⬅️ Redirect to Home
     } catch (err) {
       console.error("Logout error:", err);
     }
