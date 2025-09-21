@@ -189,7 +189,7 @@ function Home({
   );
 }
 
-function Chat() {
+function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
   const { identifyingTurnId } = useParams();
   const navigate = useNavigate();
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -230,7 +230,14 @@ function Chat() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const newTurn: Turn = await res.json();
-      setTurns((prev) => [...prev, newTurn]);
+      if (replyMode === "branch") {
+        navigate(`/chat/${newTurn.id}`);
+        if (onNewConversation) {
+          onNewConversation();
+        }
+      } else {
+        setTurns((prev) => [...prev, newTurn]);
+      }
       setReplyText("");
     } catch (err) {
       console.error("Failed to reply:", err);
@@ -717,7 +724,10 @@ function App() {
 
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/chat/:identifyingTurnId" element={<Chat />} />
+            <Route
+              path="/chat/:identifyingTurnId"
+              element={<Chat onNewConversation={fetchConversations} />}
+            />
           </Routes>
         )}
       </div>
