@@ -38,10 +38,11 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
 
-def print_firebase_users(session: Session) -> tuple[int, int]:
+# TODO: if this works well in the web app, remove from here
+def seed_user(session: Session) -> bool:
     """
     Fetch all users from Firebase and sync them to the database.
-    Returns tuple of (users_added, users_updated)
+    Returns True if it succeeded
     """
     try:
         # Get all users from Firebase (paginated)
@@ -71,12 +72,14 @@ def print_firebase_users(session: Session) -> tuple[int, int]:
                 session.add(new_user)
 
         session.commit()
+        return True
 
     except Exception as e:
         print(f"Exception hit, rolling back: {e}")
         session.rollback()
+        return False
 
 
 if __name__ == "__main__":
     with Session(engine) as session:
-        print_firebase_users(session)
+        seed_user(session)

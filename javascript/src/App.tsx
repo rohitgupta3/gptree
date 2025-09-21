@@ -259,6 +259,25 @@ function App() {
     }
   };
 
+  const handleSeedUsers = async () => {
+    try {
+      const res = await fetch(`${apiHost}/api/seed-users`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Failed to seed users");
+      }
+
+      const data = await res.json();
+      alert(data.message || "Users seeded successfully!");
+    } catch (err: any) {
+      console.error("Seed Users Error:", err);
+      alert("Seed users failed: " + err.message);
+    }
+  };
+
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
       <div
@@ -274,21 +293,37 @@ function App() {
           zIndex: 1000,
         }}
       >
-        {/* Reset DB on the left */}
-        <button
-          onClick={handleResetDatabase}
-          style={{
-            backgroundColor: "#ffc107",
-            color: "black",
-            padding: "8px 16px",
-            borderRadius: "4px",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "14px",
-          }}
-        >
-          Reset DB
-        </button>
+        {/* Admin buttons on the left */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            onClick={handleResetDatabase}
+            style={{
+              backgroundColor: "#ffc107",
+              color: "black",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Reset DB
+          </button>
+          <button
+            onClick={handleSeedUsers}
+            style={{
+              backgroundColor: "#28a745",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Seed Users
+          </button>
+        </div>
 
         {/* Auth buttons on the right */}
         <div style={{ display: "flex", gap: "10px" }}>
