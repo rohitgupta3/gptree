@@ -21,6 +21,7 @@ from models.metadata import MAIN  # This is your MetaData(schema="main")
 from models.user import User
 from models.turn import Turn  # Added import for Turn model
 from database import get_session
+from web.routers import admin
 
 project_id = os.getenv("FIREBASE_PROJECT_ID")
 client_email = os.getenv("FIREBASE_CLIENT_EMAIL")
@@ -168,51 +169,6 @@ class UserDataResponse(BaseModel):
     user_id: str
 
 
-class StatusResponse(BaseModel):
-    success: bool
-    message: str
-
-
-## TODO: remove this, this is so maybe we get access to all the models for resetting the DB
-def import_modules(package, recursive=True):
-    """
-    Import all submodules of a module, recursively, including subpackages.
-    """
-    if isinstance(package, str):
-        package = importlib.import_module(package)
-    for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
-        if "." in name:
-            continue
-        full_name = package.__name__ + "." + name
-        importlib.import_module(full_name)
-        if recursive and is_pkg:
-            import_modules(full_name)
-
-
-# Import all models recrusively under python/models
-import_modules("models")
-
-
-# TODO: remove this
-@app.post("/api/reset-db", response_model=StatusResponse)
-def reset_database(session: Session = Depends(get_session)):
-    bind = session.get_bind()
-
-    try:
-        with bind.begin() as conn:
-            MAIN.drop_all(bind=conn)
-            MAIN.create_all(bind=conn)
-
-            inspector = inspect(conn)
-            tables = inspector.get_table_names(schema="main")
-
-        return StatusResponse(
-            success=True, message=f"Reset successful. Tables now: {tables}"
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Reset failed: {e}")
-
-
 # TODO: replace with /.health
 @app.get("/status")
 def get_status():
@@ -277,6 +233,9 @@ async def create_conversation(
         print(f"Error calling Gemini stub: {e}")
 
     return CreateConversationResponse(turn_id=turn_id)
+
+
+app.include_router(admin.router)
 
 
 @app.get("/{full_path:path}")
