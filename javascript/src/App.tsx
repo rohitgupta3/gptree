@@ -115,29 +115,6 @@ function Home({
       <div className="card">
         {userData && (
           <>
-            <div className="user-info">
-              <h2>User Info</h2>
-              <p>
-                <strong>UID:</strong> {userData.uid}
-              </p>
-              {userData.email && (
-                <p>
-                  <strong>Email:</strong> {userData.email}
-                </p>
-              )}
-              {userData.name && (
-                <p>
-                  <strong>Name:</strong> {userData.name}
-                </p>
-              )}
-              {userData.picture && (
-                <p>
-                  <strong>Picture:</strong>{" "}
-                  <img src={userData.picture} alt="User" width="50" />
-                </p>
-              )}
-            </div>
-
             <div className="new-conversation">
               <h3>Start a New Conversation</h3>
               <form onSubmit={handleCreateConversation}>
