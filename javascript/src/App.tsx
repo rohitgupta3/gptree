@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+  useParams,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
@@ -391,6 +398,11 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
 }
 
 function App() {
+  const location = useLocation();
+  const currentTurnId = location.pathname.startsWith("/chat/")
+    ? location.pathname.split("/chat/")[1]
+    : null;
+
   const [userData, setUserData] = useState<FirebaseUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -684,7 +696,28 @@ function App() {
                   key={conv.identifying_turn_id}
                   style={{ marginBottom: "10px" }}
                 >
-                  <Link to={`/chat/${conv.identifying_turn_id}`}>
+                  <Link
+                    to={`/chat/${conv.identifying_turn_id}`}
+                    style={{
+                      display: "block",
+                      padding: "8px",
+                      borderRadius: "4px",
+                      textDecoration: "none",
+                      color: "black",
+                      backgroundColor:
+                        conv.identifying_turn_id === currentTurnId
+                          ? "#d0e7ff"
+                          : "transparent",
+                      border:
+                        conv.identifying_turn_id === currentTurnId
+                          ? "2px solid #007bff"
+                          : "1px solid transparent",
+                      fontWeight:
+                        conv.identifying_turn_id === currentTurnId
+                          ? "bold"
+                          : "normal",
+                    }}
+                  >
                     {conv.title || "Untitled"}
                   </Link>
                 </li>
