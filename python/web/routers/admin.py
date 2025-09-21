@@ -6,7 +6,7 @@ from sqlalchemy import inspect
 from pydantic import BaseModel
 
 from database import seed
-from database.database import create_all_tables, get_session
+from database.database import create_all_tables, get_session, get_test_session
 from models.user import User
 from auth.firebase import (
     verify_firebase_token,
@@ -90,6 +90,25 @@ def seed_turns(
 # TODO: remove this endpoint in production, at least?
 @router.post("/reset-db", response_model=StatusResponse)
 def reset_database(session: Session = Depends(get_session)):
+    bind = session.get_bind()
+
+    try:
+        with bind.begin() as conn:
+            create_all_tables(conn, drop_first=True)
+
+            inspector = inspect(conn)
+            tables = inspector.get_table_names(schema="main")
+
+        return StatusResponse(
+            success=True, message=f"Reset successful. Tables now: {tables}"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reset failed: {e}")
+
+
+# TODO: remove this endpoint in production, at least?
+@router.post("/reset-test-db", response_model=StatusResponse)
+def reset_test_database(session: Session = Depends(get_test_session)):
     bind = session.get_bind()
 
     try:

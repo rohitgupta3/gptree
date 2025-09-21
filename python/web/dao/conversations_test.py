@@ -7,6 +7,7 @@ from sqlmodel import Session, create_engine, select
 from sqlalchemy.pool import StaticPool
 
 from database.database import create_all_tables
+from database import seed
 from models.user import User
 from models.turn import Turn
 
@@ -41,4 +42,10 @@ def db_session_fixture():
 
 
 def test_create_user(db_session: Session):
+    user = User(uid="test_uid_123", email="test@example.com")
+    db_session.add(user)
+    db_session.commit()
+
+    seed.seed_turns(db_session, user.id)
+    breakpoint()
     pass

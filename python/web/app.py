@@ -1,3 +1,4 @@
+import datetime
 import os
 from typing import Any
 
@@ -126,7 +127,7 @@ class ConversationListItem(BaseModel):
     root_turn_id: UUID
     identifying_turn_id: UUID
     title: str
-    created_at: datetime
+    created_at: datetime.datetime
 
 
 @app.get("/api/conversations", response_model=list[ConversationListItem])

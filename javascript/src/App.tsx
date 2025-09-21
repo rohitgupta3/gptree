@@ -261,6 +261,25 @@ function App() {
     }
   };
 
+  const handleResetTestDatabase = async () => {
+    try {
+      const res = await fetch(`${apiHost}/api/reset-test-db`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Failed to reset test DB");
+      }
+
+      const data = await res.json();
+      alert(data.message || "Test database reset successfully!");
+    } catch (err: any) {
+      console.error("Test DB Reset Error:", err);
+      alert("Test database reset failed: " + err.message);
+    }
+  };
+
   const handleSeedUsers = async () => {
     try {
       const res = await fetch(`${apiHost}/api/seed-users`, {
@@ -310,6 +329,20 @@ function App() {
             }}
           >
             Reset DB
+          </button>
+          <button
+            onClick={handleResetTestDatabase}
+            style={{
+              backgroundColor: "#ffc107",
+              color: "black",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Reset test DB
           </button>
           <button
             onClick={handleSeedUsers}
