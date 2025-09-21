@@ -144,7 +144,12 @@ def list_conversations(
     turns = conversations.get_separable_conversations(session, user.id)
 
     return [
-        ConversationListItem(id=t.id, title=t.title, created_at=t.created_at)
+        ConversationListItem(
+            root_turn_id=t.id,
+            identifying_turn_id=t.id,  # or another ID if you track branches separately
+            title=t.title,
+            created_at=t.created_at,
+        )
         for t in turns
     ]
 

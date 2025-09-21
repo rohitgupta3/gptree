@@ -149,3 +149,42 @@ def test_create_conversation(db_session: Session):
     # Verify that the mocked stub was called with the correct arguments
     # with a MockSession, which should be fine.
     # mock_stub_gemini.assert_called_once()
+
+
+def test_list_conversations(db_session: Session):
+    """
+    Tests the GET /api/conversations endpoint.
+    Assumes a user exists and `seed_turns` correctly seeds 3 separable conversations.
+    """
+    from database import seed
+
+    # Ensure the user exists (should match the mocked uid)
+    user = User(uid="test_uid_123", email="test@example.com")
+    db_session.add(user)
+    db_session.commit()
+
+    # Seed turns for this user (3 separable conversations)
+    seed.seed_turns(db_session, user.id)
+
+    # Use the test db session
+    app.dependency_overrides[get_session] = lambda: db_session
+
+    # Make the GET request
+    response = client.get("/api/conversations")
+
+    # Check that the response is successful
+    assert response.status_code == 200
+
+    # Parse the response
+    data = response.json()
+
+    # Expecting 3 conversations
+    assert isinstance(data, list)
+    assert len(data) == 3
+
+    # Optional: verify contents of the response
+    for item in data:
+        assert "root_turn_id" in item
+        assert "identifying_turn_id" in item
+        assert "title" in item
+        assert "created_at" in item
