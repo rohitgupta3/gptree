@@ -131,3 +131,41 @@ def test_reply_to_turn(db_session: Session):
     assert updated_new.parent_id == updated_prev.id
     assert updated_prev.primary_child_id == updated_new.id
     assert updated_new.human_text == "Why are semiconductors useful?"
+
+
+def test_branch_reply_to_turn(db_session: Session):
+    # Create user
+    user = User(uid="reply_test_uid", email="reply@test.com")
+    db_session.add(user)
+    db_session.commit()
+
+    # Create original turn
+    prev_turn = Turn(
+        user_id=user.id,
+        human_text="What is a semiconductor?",
+        bot_text="A semiconductor is a material with conductivity between conductors and insulators.",
+        model="gemini-2.5-flash",
+        title="Semiconductors",
+    )
+    db_session.add(prev_turn)
+    db_session.commit()
+    db_session.refresh(prev_turn)
+
+    # Import and call function under test
+
+    new_turn = conversations.branch_reply_to_turn(
+        session=db_session,
+        user_id=user.id,
+        parent_turn_id=prev_turn.id,
+        text="What does conductivity mean?",
+    )
+
+    # Reload both turns
+    updated_prev = db_session.get(Turn, prev_turn.id)
+    updated_new = db_session.get(Turn, new_turn.id)
+
+    # Assertions
+    assert updated_new.parent_id == updated_prev.id
+    assert updated_prev.primary_child_id is None
+    assert updated_prev.branched_child_ids == [updated_new.id]
+    assert updated_new.human_text == "What does conductivity mean?"
