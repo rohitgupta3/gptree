@@ -169,8 +169,7 @@ class UserDataResponse(BaseModel):
     user_id: str
 
 
-# TODO: replace with /.health
-@app.get("/status")
+@app.get("/.health")
 def get_status():
     return JSONResponse(content={"success": True})
 
