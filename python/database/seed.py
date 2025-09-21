@@ -105,7 +105,22 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     )
     session.commit()
 
-    purple_1_turn.primary_child_id = blue_1_turn.id
+    purple_1_turn.primary_child_id = purple_2_turn.id
+    purple_2_turn.parent_id = purple_1_turn.id
+
+    purple_1_turn.branched_child_ids = [blue_1_turn.id]
+    blue_1_turn.parent_id = purple_1_turn.id
+
+    blue_1_turn.primary_child_id = blue_2_turn.id
+    blue_2_turn.parent_id = blue_1_turn.id
+
+    blue_2_turn.primary_child_id = blue_3_turn.id
+    blue_3_turn.parent_id = blue_2_turn.id
+
+    blue_2_turn.branched_child_ids = [green_1_turn.id]
+    green_1_turn.parent_id = blue_2_turn.id
+
+    session.commit()
 
     return True
 
