@@ -91,3 +91,38 @@ def reply_to_turn(
     session.commit()
 
     return new_turn
+
+
+def branch_reply_to_turn(
+    session: Session,
+    user_id: UUID,
+    parent_turn_id: UUID,
+    text: str,
+) -> Turn:
+    parent = session.get(Turn, parent_turn_id)
+
+    if not parent or parent.user_id != user_id:
+        raise ValueError("Invalid parent or unauthorized")
+
+    # Create a new Turn
+    new_turn = Turn(
+        user_id=user_id,
+        human_text=text,
+        model="gemini-2.5-flash",
+        title=parent.title + " - branch",
+        parent_id=parent.id,
+        bot_text=None,
+    )
+
+    session.add(new_turn)
+    session.commit()
+    session.refresh(new_turn)
+
+    # Update branched_child_ids
+    parent.branched_child_ids = parent.branched_child_ids or []
+    parent.branched_child_ids.append(new_turn.id)
+
+    session.add(parent)
+    session.commit()
+
+    return new_turn
