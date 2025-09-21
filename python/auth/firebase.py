@@ -2,10 +2,11 @@ import base64
 import os
 from typing import Any
 
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
-from firebase_admin import auth as fb_auth, credentials
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from firebase_admin import auth as fb_auth
+from firebase_admin import credentials
 
 # TODO: remove from web
 from web.schemas.user import CurrentUser

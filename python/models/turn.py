@@ -1,14 +1,13 @@
-from uuid import UUID, uuid4
 from datetime import datetime
+from uuid import UUID, uuid4
 
-from sqlmodel import SQLModel, Field, Column
 import sqlalchemy
+import sqlalchemy_utils
+from models.metadata import MAIN
 from sqlalchemy import DateTime, func
 from sqlalchemy.dialects import postgresql
-import sqlalchemy_utils
 from sqlalchemy_utils import UUIDType
-
-from models.metadata import MAIN
+from sqlmodel import Column, Field, SQLModel
 
 
 class Turn(SQLModel, table=True):

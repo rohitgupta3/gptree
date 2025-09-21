@@ -1,15 +1,14 @@
 import os
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import patch, Mock
-
-from fastapi.testclient import TestClient
-from sqlmodel import Session, create_engine, select
-from sqlalchemy.pool import StaticPool
-
-from database.database import create_all_tables
 from database import seed
-from models.user import User
+from database.database import create_all_tables
+from fastapi.testclient import TestClient
 from models.turn import Turn
+from models.user import User
+from sqlalchemy.pool import StaticPool
+from sqlmodel import Session, create_engine, select
 from web.dao import conversations
 
 # TODO: DRY with other test files

@@ -1,10 +1,9 @@
 import os
 from uuid import UUID
 
-from sqlmodel import Session
 from google import genai
-
 from models.turn import Turn
+from sqlmodel import Session
 from web.dao import conversations
 
 client = genai.Client()  # will read GEMINI_API_KEY automatically

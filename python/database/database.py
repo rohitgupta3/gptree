@@ -2,9 +2,8 @@ import importlib
 import os
 import pkgutil
 
-from sqlmodel import create_engine, Session
-
 from models.metadata import MAIN
+from sqlmodel import Session, create_engine
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 

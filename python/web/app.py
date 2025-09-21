@@ -1,30 +1,30 @@
 import datetime
 import os
 from typing import Any
-
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from sqlmodel import Session, select
-from pydantic import BaseModel
 from uuid import UUID
 
 from auth.firebase import (
-    verify_firebase_token,
     authenticate as authenticate_to_firebase,
-    get_current_user,
 )
-from models.user import User
-from models.turn import Turn
+from auth.firebase import (
+    get_current_user,
+    verify_firebase_token,
+)
 from database.database import get_session
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from llm.llm import gemini_with_fallback
-from web.routers import admin
-from web.schemas.user import CurrentUser
+from models.turn import Turn
+from models.user import User
+from pydantic import BaseModel
+from sqlmodel import Session, select
 from web.dao import conversations
 from web.dao.conversations import get_full_conversation_from_turn_id, reply_to_turn
-from web.schemas.turn import TurnResponse  # adjust import if defined elsewhere
-
+from web.routers import admin
+from web.schemas.turn import TurnResponse
+from web.schemas.user import CurrentUser
 
 authenticate_to_firebase()
 

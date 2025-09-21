@@ -1,14 +1,11 @@
 import importlib
-from logging.config import fileConfig
 import os
 import pkgutil
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from logging.config import fileConfig
 
 from alembic import context
-
 from models.metadata import MAIN
+from sqlalchemy import engine_from_config, pool
 
 
 def import_modules(package, recursive=True):

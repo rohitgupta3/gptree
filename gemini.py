@@ -1,5 +1,6 @@
 # simple_gemini_flash_lite.py
 import os
+
 from google import genai
 
 # Option A: rely on env var GEMINI_API_KEY

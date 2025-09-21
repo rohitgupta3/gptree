@@ -4,8 +4,9 @@ Terminal Chatbot using Google Gemini AI
 Run this script to start an interactive chat session in your terminal.
 """
 
-from google import genai
 import sys
+
+from google import genai
 
 
 def main():

@@ -1,11 +1,9 @@
 from uuid import UUID
 
-from sqlmodel import select, or_, Session
-from sqlalchemy import func
-from sqlalchemy.orm import aliased
 from models.turn import Turn  # Adjust import as needed
-
-from sqlalchemy import func, any_
+from sqlalchemy import any_, func
+from sqlalchemy.orm import aliased
+from sqlmodel import Session, or_, select
 
 
 def get_separable_conversations(session: Session, user_id: UUID) -> list[Turn]:

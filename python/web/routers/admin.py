@@ -1,18 +1,19 @@
 # TODO: remove this entire module, this is just for quick iteration early on
-from fastapi import APIRouter, Depends, HTTPException
-from firebase_admin import auth as fb_auth
-from sqlmodel import Session, select
-from sqlalchemy import inspect
-from pydantic import BaseModel
-
+from auth.firebase import (
+    authenticate as authenticate_to_firebase,
+)
+from auth.firebase import (
+    get_current_user,
+    verify_firebase_token,
+)
 from database import seed
 from database.database import create_all_tables, get_session, get_test_session
+from fastapi import APIRouter, Depends, HTTPException
+from firebase_admin import auth as fb_auth
 from models.user import User
-from auth.firebase import (
-    verify_firebase_token,
-    authenticate as authenticate_to_firebase,
-    get_current_user,
-)
+from pydantic import BaseModel
+from sqlalchemy import inspect
+from sqlmodel import Session, select
 from web.schemas.user import CurrentUser
 
 router = APIRouter(prefix="/api", tags=["admin"])
