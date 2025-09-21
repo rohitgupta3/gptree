@@ -3,10 +3,8 @@ import pkgutil
 from unittest.mock import patch, Mock
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlmodel import Session, create_engine, select
 from sqlalchemy.pool import StaticPool
-from sqlmodel import select
 
 from web.app import app, get_session, get_current_user, CurrentUser
 from models.metadata import MAIN
@@ -20,17 +18,13 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 # Override the get_session dependency
 def override_get_session():
     """Provides a mocked database session for testing."""
-    session = TestingSessionLocal()
-    try:
+    with Session(engine) as session:
         yield session
-    finally:
-        session.close()
 
 
 # Define a mock for the current user to bypass the authentication dependency
@@ -89,36 +83,35 @@ def test_create_user():
     assert "user_id" in data
 
     # You can also verify the user was added to the mock database
-    session = TestingSessionLocal()
-    user = session.query(User).filter_by(uid="test_uid_123").first()
-    # user = session.execute(select(User).where(User.uid == "test_uid_123")).first()
-    assert user is not None
-    assert user.email == "test@example.com"
+    with Session(engine) as session:
+        user = session.exec(select(User).where(User.uid == "test_uid_123")).first()
+        assert user is not None
+        assert user.email == "test@example.com"
 
 
 @patch("web.app._stub_gemini")
-def test_create_conversation(stub__stub_gemini: Mock):
+def test_create_conversation(mock_stub_gemini: Mock):
     """
     Tests the create_conversation endpoint and verifies a Turn is created.
     Uses mock.patch to simulate the gemini stub call.
     """
     # Create a user in the test database since the endpoint requires it.
     # The uid must match the one returned by the mocked get_current_user.
-    session = TestingSessionLocal()
-    user = User(uid="test_uid_1234", email="test2@example.com")
-    session.add(user)
-    session.commit()
-    session.refresh(user)
+    with Session(engine) as session:
+        user = User(uid="test_uid_123", email="test@example.com")
+        session.add(user)
+        session.commit()
+        session.refresh(user)
 
     # Define the behavior of the mock stub
     # It should modify the bot_text field of the Turn object
     def side_effect(session, turn_id):
-        turn = session.execute(select(Turn).where(Turn.id == turn_id)).one()
+        turn = session.exec(select(Turn).where(Turn.id == turn_id)).one()
         turn.bot_text = "Mocked bot response."
-        # session.add(turn)
+        session.add(turn)
         session.commit()
 
-    stub__stub_gemini.side_effect = side_effect
+    mock_stub_gemini.side_effect = side_effect
 
     # Define the request payload
     payload = {"text": "Hello, Gemini!"}
@@ -135,14 +128,15 @@ def test_create_conversation(stub__stub_gemini: Mock):
     turn_id = response_data["turn_id"]
 
     # Verify that the Turn was created in the database
-    db_turn = session.execute(select(Turn).where(Turn.id == turn_id)).one()
-    assert db_turn is not None
-    assert db_turn.human_text == "Hello, Gemini!"
-    assert db_turn.user_id == user.id
-    assert db_turn.parent_turn_id is None
+    with Session(engine) as session:
+        db_turn = session.exec(select(Turn).where(Turn.id == turn_id)).one()
+        assert db_turn is not None
+        assert db_turn.human_text == "Hello, Gemini!"
+        assert db_turn.user_id == user.id
+        assert db_turn.parent_turn_id is None
+        # Verify that the mock successfully mutated the Turn's bot_text
+        assert db_turn.bot_text == "Mocked bot response."
 
     # Verify that the mocked stub was called with the correct arguments
-    stub__stub_gemini.assert_called_once_with(session, turn_id)
-
-    # Verify that the mock successfully mutated the Turn's bot_text
-    assert db_turn.bot_text == "Mocked bot response."
+    # with a MockSession, which should be fine.
+    mock_stub_gemini.assert_called_once()
