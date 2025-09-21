@@ -10,6 +10,7 @@ from database.database import create_all_tables
 from database import seed
 from models.user import User
 from models.turn import Turn
+from web.dao import conversations
 
 # TODO: DRY with other test files
 
@@ -47,5 +48,7 @@ def test_create_user(db_session: Session):
     db_session.commit()
 
     seed.seed_turns(db_session, user.id)
+    separable_conversations = conversations.get_separable_conversations(db_session)
     breakpoint()
     pass
+    # assert len(separable_conversations) == 3
