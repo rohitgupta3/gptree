@@ -21,6 +21,26 @@ engine = create_engine(
 )
 
 
+def import_modules(package, recursive=True):
+    """
+    Import all submodules of a module, recursively, including subpackages.
+    """
+    if isinstance(package, str):
+        package = importlib.import_module(package)
+    for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
+        if "." in name:
+            continue
+        full_name = package.__name__ + "." + name
+        importlib.import_module(full_name)
+        if recursive and is_pkg:
+            import_modules(full_name)
+
+
+# Create the database schema once when the module is imported
+import_modules("models")
+MAIN.create_all(bind=engine)
+
+
 @pytest.fixture(name="db_session")
 def db_session_fixture():
     """
@@ -30,14 +50,6 @@ def db_session_fixture():
     connection = engine.connect()
     transaction = connection.begin()
     session = Session(bind=connection)
-
-    # Import all models to ensure they are registered with the engine's metadata
-    # This is done here to ensure the tables exist before the first test
-    # but the transaction handles the cleanup for each test
-    import_modules("models")
-    MAIN.create_all(bind=engine)
-
-    # Use a try/finally block to ensure the session and connection are closed
     try:
         yield session
     finally:
@@ -70,28 +82,13 @@ app.dependency_overrides[get_current_user] = override_get_current_user
 client = TestClient(app)
 
 
-def import_modules(package, recursive=True):
-    """
-    Import all submodules of a module, recursively, including subpackages.
-    """
-    if isinstance(package, str):
-        package = importlib.import_module(package)
-    for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
-        if "." in name:
-            continue
-        full_name = package.__name__ + "." + name
-        importlib.import_module(full_name)
-        if recursive and is_pkg:
-            import_modules(full_name)
-
-
 def test_create_user(db_session: Session):
     """Tests the create_user endpoint."""
-    # Define the payload
-    payload = {"uid": "test_uid_123", "email": "test@example.com"}
-
     # Use a custom dependency override for this test to inject our fixture session
     app.dependency_overrides[get_session] = lambda: db_session
+
+    # Define the payload
+    payload = {"uid": "test_uid_123", "email": "test@example.com"}
 
     # Make the POST request
     response = client.post("/api/user", json=payload)
