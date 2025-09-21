@@ -58,6 +58,11 @@ class ReplyRequest(BaseModel):
     text: str
 
 
+class BranchReplyRequest(BaseModel):
+    parent_turn_id: UUID
+    text: str
+
+
 app = FastAPI(title="Simple User Project API")
 
 
@@ -201,6 +206,31 @@ def reply_to_conversation(
         _stub_gemini(session, new_turn.id)
     except Exception as e:
         print(f"Stub failed: {e}")
+
+    return new_turn
+
+
+@app.post("/api/conversation/branch-reply", response_model=TurnResponse)
+def branch_reply_to_conversation(
+    payload: BranchReplyRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    user = session.exec(select(User).where(User.uid == current_user.uid)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_turn = conversations.branch_reply_to_turn(
+        session=session,
+        user_id=user.id,
+        parent_turn_id=payload.parent_turn_id,
+        text=payload.text,
+    )
+
+    try:
+        _stub_gemini(session, new_turn.id)
+    except Exception as e:
+        print(f"Branch stub failed: {e}")
 
     return new_turn
 
