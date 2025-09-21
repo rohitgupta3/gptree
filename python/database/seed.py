@@ -17,32 +17,32 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     purple_1 = (
         "Can you explain to me the BJT (semiconductor)?",
         "A BJT (Bipolar Junction Transistor) is a type of semiconductor device that can amplify or switch electrical signals",
-        "Explain BJT",
+        "Purple",
     )
     purple_2 = (
         "Is there any usage of BJT amplifiers besides audio amplification?",
         None,
-        "Explain BJT",
+        "Purple",
     )
     blue_1 = (
         "Can you explain to me the basics of semiconductors first?",
         "Sure! Let’s start with the basics of semiconductors, which are materials...",
-        "Explain BJT - branch",  # TODO: "BJT / semiconductors" or something
+        "Blue",  # TODO: "BJT / semiconductors" or something
     )
     blue_2 = (
         "Can you explain the p-n junction?",
         "A p-n junction is the basic building block of semiconductor devices, such as diodes",
-        "Explain BJT - branch",
+        "Blue",
     )
     blue_3 = (
         "What’s the difference between “p-side” and “p-terminal”?",
         "The terms p-side and p-terminal refer to different aspects of a semiconductor...",
-        "Explain BJT - branch",
+        "Blue",
     )
     green_1 = (
         "Why does the depletion region create an electric field?",
         "The depletion region in a p-n junction creates an electric field due to...",
-        "Explain BJT - branch - branch",  # TODO: something else
+        "Green",  # TODO: something else
     )
 
     purple_1_turn = Turn(
