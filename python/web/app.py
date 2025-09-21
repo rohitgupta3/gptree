@@ -22,6 +22,8 @@ from llm.llm import _stub_gemini
 from web.routers import admin
 from web.schemas.user import CurrentUser
 from web.dao import conversations
+from web.dao.conversations import get_full_conversation_from_turn_id
+from web.schemas.turn import TurnResponse  # adjust import if defined elsewhere
 
 
 authenticate_to_firebase()
@@ -152,6 +154,24 @@ def list_conversations(
         )
         for t in turns
     ]
+
+
+@app.get("/api/conversation/{turn_id}", response_model=list[TurnResponse])
+def get_conversation_by_turn_id(
+    turn_id: UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    user = session.exec(select(User).where(User.uid == current_user.uid)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    full_convo = get_full_conversation_from_turn_id(session, turn_id, user.id)
+
+    if not full_convo:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    return full_convo
 
 
 app.include_router(admin.router)

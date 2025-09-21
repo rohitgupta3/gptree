@@ -82,7 +82,7 @@ def test_full_conversation_from_identifying_turn_id(db_session: Session):
     # Import function under test
 
     full_convo = conversations.get_full_conversation_from_turn_id(
-        db_session, identifying_turn.id
+        db_session, identifying_turn.id, user.id
     )
 
     # Assert expected sequence

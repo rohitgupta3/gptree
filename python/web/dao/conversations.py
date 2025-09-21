@@ -27,9 +27,14 @@ def get_separable_conversations(session: Session, user_id: UUID) -> list[Turn]:
     return session.exec(stmt).all()
 
 
-def get_full_conversation_from_turn_id(session: Session, turn_id: UUID) -> list[Turn]:
+def get_full_conversation_from_turn_id(
+    session: Session, turn_id: UUID, user_id: UUID
+) -> list[Turn]:
     # Traverse up to root
     current = session.get(Turn, turn_id)
+    if current.user_id != user_id:
+        raise ValueError("User is not authorized")
+
     if not current:
         return []
 
