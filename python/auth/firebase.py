@@ -4,7 +4,9 @@ import base64
 import firebase_admin
 from firebase_admin import credentials, auth
 
-# Decode the base64 private key
+# Normally would generate creds via the JSON file provided. Instead we base64-encoded
+# the "private_key" value and put it into the environment, and put the other values
+# into the environment as well
 firebase_private_key_b64 = os.environ["FIREBASE_PRIVATE_KEY_BASE64"]
 firebase_private_key = base64.b64decode(firebase_private_key_b64).decode("utf-8")
 
