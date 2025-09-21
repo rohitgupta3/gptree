@@ -38,6 +38,7 @@ class Turn(SQLModel, table=True):
         sa_type=postgresql.ARRAY(sqlalchemy_utils.UUIDType),
         default_factory=list,
     )
+    title: str
     user_id: UUID
     human_text: str
     model: str
@@ -46,3 +47,27 @@ class Turn(SQLModel, table=True):
     bot_text: str | None
     # TODO: other bot input
     # TODO: llm_request_id once that is set up
+
+
+# class Conversation(SQLModel, table=True):
+#     metadata = MAIN
+#     __tablename__ = "conversation"
+#     id: UUID = Field(
+#         sa_column=Column(
+#             UUIDType,
+#             primary_key=True,
+#             server_default=sqlalchemy.sql.text("gen_random_uuid()"),
+#         ),
+#         default_factory=uuid4,
+#     )
+
+#     created_at: datetime = Field(
+#         sa_column=Column(
+#             DateTime(timezone=True),
+#             nullable=False,
+#             server_default=func.now(),
+#         )
+#     )
+
+#     title: str
+#     turn_id: UUID

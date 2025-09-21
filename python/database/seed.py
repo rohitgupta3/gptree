@@ -17,30 +17,37 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     purple_1 = (
         "Can you explain to me the BJT (semiconductor)?",
         "A BJT (Bipolar Junction Transistor) is a type of semiconductor device that can amplify or switch electrical signals",
+        "Explain BJT",
     )
     purple_2 = (
         "Is there any usage of BJT amplifiers besides audio amplification?",
         None,
+        "Explain BJT",
     )
     blue_1 = (
         "Can you explain to me the basics of semiconductors first?",
         "Sure! Let’s start with the basics of semiconductors, which are materials...",
+        "Explain BJT - branch",  # TODO: "BJT / semiconductors" or something
     )
     blue_2 = (
         "Can you explain the p-n junction?",
         "A p-n junction is the basic building block of semiconductor devices, such as diodes",
+        "Explain BJT - branch",
     )
     blue_3 = (
         "What’s the difference between “p-side” and “p-terminal”?",
         "The terms p-side and p-terminal refer to different aspects of a semiconductor...",
+        "Explain BJT - branch",
     )
     green_1 = (
         "Why does the depletion region create an electric field?",
         "The depletion region in a p-n junction creates an electric field due to...",
+        "Explain BJT - branch - branch",  # TODO: something else
     )
 
     purple_1_turn = Turn(
         user_id=user_id,
+        title=purple_1[2],
         human_text=purple_1[0],
         bot_text=purple_1[1],
         model="gemini-2.5-flash",
@@ -50,6 +57,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     )
     purple_2_turn = Turn(
         user_id=user_id,
+        title=purple_2[2],
         human_text=purple_2[0],
         bot_text=purple_2[1],
         model="gemini-2.5-flash",
@@ -59,6 +67,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     )
     blue_1_turn = Turn(
         user_id=user_id,
+        title=blue_1[2],
         human_text=blue_1[0],
         bot_text=blue_1[1],
         model="gemini-2.5-flash",
@@ -68,6 +77,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     )
     blue_2_turn = Turn(
         user_id=user_id,
+        title=blue_2[2],
         human_text=blue_2[0],
         bot_text=blue_2[1],
         model="gemini-2.5-flash",
@@ -77,6 +87,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     )
     blue_3_turn = Turn(
         user_id=user_id,
+        title=blue_3[2],
         human_text=blue_3[0],
         bot_text=blue_3[1],
         model="gemini-2.5-flash",
@@ -86,6 +97,7 @@ def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     )
     green_1_turn = Turn(
         user_id=user_id,
+        title=green_1[2],
         human_text=green_1[0],
         bot_text=green_1[1],
         model="gemini-2.5-flash",
