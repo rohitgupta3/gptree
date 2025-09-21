@@ -12,6 +12,7 @@ import Signup from "./components/Signup";
 import Login from "./components/Login";
 import { auth } from "./config/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import ReactMarkdown from "react-markdown";
 
 // API host from .env
 const apiHost = import.meta.env.VITE_API_HOST;
@@ -306,9 +307,20 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
                 </p>
               )}
               {turn.bot_text && (
-                <p>
-                  <strong>Bot:</strong> {turn.bot_text}
-                </p>
+                <div>
+                  <strong>Bot:</strong>
+                  <div
+                    style={{
+                      backgroundColor: "#f8f9fa",
+                      padding: "10px",
+                      borderRadius: "4px",
+                      marginTop: "5px",
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    <ReactMarkdown>{turn.bot_text}</ReactMarkdown>
+                  </div>
+                </div>
               )}
             </div>
           ))}
