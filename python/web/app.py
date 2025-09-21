@@ -16,7 +16,7 @@ from auth.firebase import (
 )
 from models.user import User
 from models.turn import Turn
-from database import get_session
+from database.database import get_session
 from llm.llm import _stub_gemini
 from web.routers import admin
 

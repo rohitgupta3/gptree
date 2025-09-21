@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from sqlalchemy import inspect
 from pydantic import BaseModel
 
-from database import create_all_tables, get_session
+from database.database import create_all_tables, get_session
 from models.user import User
 
 

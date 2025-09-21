@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, create_engine, select
 from sqlalchemy.pool import StaticPool
 
-from database import create_all_tables
+from database.database import create_all_tables
 from web.app import app, get_session, get_current_user
 from models.user import User
 from models.turn import Turn
