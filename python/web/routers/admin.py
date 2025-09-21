@@ -1,10 +1,6 @@
 # TODO: remove this entire module, this is just for quick iteration early on
 from auth.firebase import (
-    authenticate as authenticate_to_firebase,
-)
-from auth.firebase import (
     get_current_user,
-    verify_firebase_token,
 )
 from database import seed
 from database.database import create_all_tables, get_session, get_test_session

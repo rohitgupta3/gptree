@@ -1,5 +1,4 @@
 # simple_gemini_flash_lite.py
-import os
 
 from google import genai
 

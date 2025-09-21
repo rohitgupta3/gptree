@@ -3,7 +3,7 @@ import os
 from typing import Any
 
 import firebase_admin
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin import auth as fb_auth
 from firebase_admin import credentials

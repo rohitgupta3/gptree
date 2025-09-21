@@ -1,6 +1,5 @@
 import datetime
-from typing import Optional
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from models.turn import Turn  # Adjust if Turn is elsewhere
 from models.user import User

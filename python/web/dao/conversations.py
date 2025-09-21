@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from models.turn import Turn  # Adjust import as needed
-from sqlalchemy import any_, func
+from sqlalchemy import any_
 from sqlalchemy.orm import aliased
 from sqlmodel import Session, or_, select
 

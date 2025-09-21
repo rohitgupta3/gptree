@@ -1,12 +1,10 @@
 import os
-from unittest.mock import Mock, patch
 
 import pytest
 from database.database import create_all_tables
 from fastapi.testclient import TestClient
 from models.turn import Turn
 from models.user import User
-from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, create_engine, select
 from web.app import app, get_current_user, get_session
 
