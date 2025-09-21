@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 from uuid import UUID
 
@@ -21,6 +22,9 @@ from web.dao.conversations import get_full_conversation_from_turn_id, reply_to_t
 from web.routers import admin
 from web.schemas.turn import TurnResponse
 from web.schemas.user import CurrentUser
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 authenticate_to_firebase()
 
@@ -135,7 +139,7 @@ async def create_conversation(
     except Exception as e:
         # If the stub fails, we should still return the turn ID
         # but log the error for debugging
-        print(f"Error calling Gemini stub: {e}")
+        logger.error(f"Error calling Gemini stub: {e}")
 
     return CreateConversationResponse(turn_id=turn_id)
 
@@ -201,7 +205,7 @@ def reply_to_conversation(
     try:
         gemini_with_fallback(session, new_turn.id)
     except Exception as e:
-        print(f"Stub failed: {e}")
+        logger.error(f"Stub failed: {e}")
 
     return new_turn
 
@@ -226,7 +230,7 @@ def branch_reply_to_conversation(
     try:
         gemini_with_fallback(session, new_turn.id, create_title=True)
     except Exception as e:
-        print(f"Branch stub failed: {e}")
+        logger.error(f"Branch stub failed: {e}")
 
     return new_turn
 

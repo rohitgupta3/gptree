@@ -1,3 +1,4 @@
+import logging
 import os
 from uuid import UUID
 
@@ -5,6 +6,9 @@ from google import genai
 from models.turn import Turn
 from sqlmodel import Session
 from web.dao import conversations
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 client = genai.Client()  # will read GEMINI_API_KEY automatically
 
@@ -72,7 +76,7 @@ def gemini_with_history(
         session.add(turn)
         session.commit()
     except Exception as e:
-        print(e)
+        logger.error(f"Title failed: {e}")
 
 
 def gemini_fallback(
