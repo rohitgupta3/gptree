@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { Routes, Route, Link, useNavigate, useParams } from "react-router-dom";
 import "./App.css";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
@@ -24,6 +24,16 @@ interface ConversationListItem {
   identifying_turn_id: string;
   title: string;
   created_at: string; // ISO date string
+}
+
+interface Turn {
+  id: string;
+  parent_id: string | null;
+  primary_child_id: string | null;
+  branched_child_ids: string[];
+  human_text: string | null;
+  bot_text: string | null;
+  created_at: string;
 }
 
 function Home({ userData }: { userData: FirebaseUser | null }) {
@@ -170,15 +180,79 @@ function Home({ userData }: { userData: FirebaseUser | null }) {
   );
 }
 
-// Placeholder Chat component for the new route
 function Chat() {
+  const { identifyingTurnId } = useParams();
   const navigate = useNavigate();
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchConversation = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user || !identifyingTurnId) return;
+
+        const token = await user.getIdToken();
+        const res = await fetch(
+          `${apiHost}/api/conversation/${identifyingTurnId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data: Turn[] = await res.json();
+        setTurns(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching conversation:", err);
+        setError("Failed to load conversation.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConversation();
+  }, [identifyingTurnId]);
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Chat Interface</h1>
-      <p>This is a placeholder for the chat interface.</p>
-      <p>Scrolling to specific turn will be implemented later.</p>
+      <h1>Chat</h1>
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {!loading && !error && (
+        <>
+          {turns.map((turn) => (
+            <div
+              key={turn.id}
+              style={{
+                border: "1px solid #ccc",
+                padding: "10px",
+                marginBottom: "10px",
+                borderRadius: "4px",
+              }}
+            >
+              {turn.human_text && (
+                <p>
+                  <strong>You:</strong> {turn.human_text}
+                </p>
+              )}
+              {turn.bot_text && (
+                <p>
+                  <strong>Bot:</strong> {turn.bot_text}
+                </p>
+              )}
+            </div>
+          ))}
+        </>
+      )}
+
       <button
         onClick={() => navigate("/")}
         style={{
