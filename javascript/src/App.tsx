@@ -634,20 +634,33 @@ function App() {
         {/* Auth buttons on the right */}
         <div style={{ display: "flex", gap: "10px" }}>
           {userData ? (
-            <button
-              onClick={handleLogout}
-              style={{
-                backgroundColor: "#dc3545",
-                color: "white",
-                padding: "8px 16px",
-                borderRadius: "4px",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
-            >
-              Logout
-            </button>
+            <>
+              {userData.email && (
+                <span
+                  style={{
+                    fontSize: "14px",
+                    color: "#333",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {userData.email}
+                </span>
+              )}
+              <button
+                onClick={handleLogout}
+                style={{
+                  backgroundColor: "#dc3545",
+                  color: "white",
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                }}
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <Link
