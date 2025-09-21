@@ -126,7 +126,7 @@ function Home({
                   cols={50}
                   style={{
                     width: "100%",
-                    maxWidth: "500px",
+                    maxWidth: "700px", // Increased from 500px
                     padding: "10px",
                     margin: "10px 0",
                     borderRadius: "4px",
@@ -303,66 +303,81 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
             </div>
           ))}
           <form onSubmit={handleReply} style={{ marginTop: "20px" }}>
-            <textarea
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder="Type your reply..."
-              rows={3}
-              cols={50}
-              style={{
-                width: "100%",
-                maxWidth: "600px",
-                padding: "10px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-                fontSize: "14px",
-                fontFamily: "inherit",
-              }}
-              disabled={isReplying}
-            />
-            <br />
-            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-              <button
-                type="submit"
-                disabled={!replyText.trim() || isReplying}
+            <div
+              style={{ display: "flex", gap: "15px", alignItems: "flex-start" }}
+            >
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Type your reply..."
+                rows={3}
+                cols={50}
                 style={{
-                  backgroundColor: "#6c757d",
-                  color: "white",
-                  padding: "10px 20px",
-                  border: "none",
+                  width: "100%",
+                  maxWidth: "800px", // Increased from 600px
+                  padding: "10px",
                   borderRadius: "4px",
-                  cursor:
-                    isReplying || !replyText.trim() ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                  opacity: isReplying || !replyText.trim() ? 0.6 : 1,
+                  border: "1px solid #ccc",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  flex: "1",
                 }}
-                onClick={() => setReplyMode("reply")}
+                disabled={isReplying}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  minWidth: "120px",
+                }}
               >
-                {isReplying && replyMode === "reply"
-                  ? "Replying..."
-                  : "Send Reply"}
-              </button>
+                <button
+                  type="submit"
+                  disabled={!replyText.trim() || isReplying}
+                  style={{
+                    backgroundColor: "#6c757d",
+                    color: "white",
+                    padding: "10px 20px",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor:
+                      isReplying || !replyText.trim()
+                        ? "not-allowed"
+                        : "pointer",
+                    fontSize: "16px",
+                    opacity: isReplying || !replyText.trim() ? 0.6 : 1,
+                  }}
+                  onClick={() => setReplyMode("reply")}
+                >
+                  {isReplying && replyMode === "reply"
+                    ? "Replying..."
+                    : "Send Reply"}
+                </button>
 
-              <button
-                type="submit"
-                disabled={!replyText.trim() || isReplying}
-                style={{
-                  backgroundColor: "#6c757d",
-                  color: "white",
-                  padding: "10px 20px",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor:
-                    isReplying || !replyText.trim() ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                  opacity: isReplying || !replyText.trim() ? 0.6 : 1,
-                }}
-                onClick={() => setReplyMode("branch")}
-              >
-                {isReplying && replyMode === "branch"
-                  ? "Replying..."
-                  : "Branch Reply"}
-              </button>
+                <button
+                  type="submit"
+                  disabled={!replyText.trim() || isReplying}
+                  style={{
+                    backgroundColor: "#6c757d",
+                    color: "white",
+                    padding: "10px 20px",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor:
+                      isReplying || !replyText.trim()
+                        ? "not-allowed"
+                        : "pointer",
+                    fontSize: "16px",
+                    opacity: isReplying || !replyText.trim() ? 0.6 : 1,
+                  }}
+                  onClick={() => setReplyMode("branch")}
+                >
+                  {isReplying && replyMode === "branch"
+                    ? "Replying..."
+                    : "Branch Reply"}
+                </button>
+              </div>
             </div>
           </form>
         </>
