@@ -681,70 +681,73 @@ function App() {
         </div>
       </div>
 
-      {conversations.length > 0 && (
-        <div
-          style={{
-            position: "fixed",
-            top: "60px",
-            left: 0,
-            width: "250px",
-            height: "calc(100% - 60px)",
-            backgroundColor: "#f1f1f1",
-            padding: "20px",
-            overflowY: "auto",
-            borderRight: "1px solid #ccc",
-          }}
-        >
-          <h3>Conversations</h3>
-          {conversationFetchError ? (
-            <p style={{ color: "red" }}>{conversationFetchError}</p>
-          ) : conversations.length === 0 ? (
-            <p style={{ fontStyle: "italic", color: "#666" }}>
-              No conversations yet.
-            </p>
-          ) : (
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {conversations.map((conv) => (
-                <li
-                  key={conv.identifying_turn_id}
-                  style={{ marginBottom: "10px" }}
+      <div
+        style={{
+          position: "fixed",
+          top: "60px",
+          left: 0,
+          width: "250px",
+          height: "calc(100% - 60px)",
+          backgroundColor: "#f1f1f1",
+          padding: "20px",
+          overflowY: "auto",
+          borderRight: "1px solid #ccc",
+        }}
+      >
+        <h3>Conversations</h3>
+
+        {!userData ? (
+          <p style={{ fontStyle: "italic", color: "#666" }}>
+            Please log in to see your chats.
+          </p>
+        ) : conversationFetchError ? (
+          <p style={{ color: "red" }}>{conversationFetchError}</p>
+        ) : conversations.length === 0 ? (
+          <p style={{ fontStyle: "italic", color: "#666" }}>
+            No conversations yet.
+          </p>
+        ) : (
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {conversations.map((conv) => (
+              <li
+                key={conv.identifying_turn_id}
+                style={{ marginBottom: "10px" }}
+              >
+                <Link
+                  to={`/chat/${conv.identifying_turn_id}`}
+                  style={{
+                    display: "block",
+                    padding: "8px",
+                    borderRadius: "4px",
+                    textDecoration: "none",
+                    color: "black",
+                    backgroundColor:
+                      conv.identifying_turn_id === currentTurnId
+                        ? "#d0e7ff"
+                        : "transparent",
+                    border:
+                      conv.identifying_turn_id === currentTurnId
+                        ? "2px solid #007bff"
+                        : "1px solid transparent",
+                    fontWeight:
+                      conv.identifying_turn_id === currentTurnId
+                        ? "bold"
+                        : "normal",
+                  }}
                 >
-                  <Link
-                    to={`/chat/${conv.identifying_turn_id}`}
-                    style={{
-                      display: "block",
-                      padding: "8px",
-                      borderRadius: "4px",
-                      textDecoration: "none",
-                      color: "black",
-                      backgroundColor:
-                        conv.identifying_turn_id === currentTurnId
-                          ? "#d0e7ff"
-                          : "transparent",
-                      border:
-                        conv.identifying_turn_id === currentTurnId
-                          ? "2px solid #007bff"
-                          : "1px solid transparent",
-                      fontWeight:
-                        conv.identifying_turn_id === currentTurnId
-                          ? "bold"
-                          : "normal",
-                    }}
-                  >
-                    {conv.title || "Untitled"}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
+                  {conv.title || "Untitled"}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Main content */}
       <div
         style={{
           paddingTop: "60px",
-          marginLeft: conversations.length > 0 ? "250px" : "0",
+          marginLeft: "250px",
         }}
       >
         {loadingUser && <p style={{ padding: "20px" }}>Loading user...</p>}
