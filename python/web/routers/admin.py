@@ -1,7 +1,4 @@
 # TODO: remove this entire module, this is just for quick iteration early on
-from auth.firebase import (
-    get_current_user,
-)
 from database import seed
 from database.database import create_all_tables, get_session, get_test_session
 from fastapi import APIRouter, Depends, HTTPException
@@ -10,7 +7,6 @@ from models.user import User
 from pydantic import BaseModel
 from sqlalchemy import inspect
 from sqlmodel import Session, select
-from web.schemas.user import CurrentUser
 
 router = APIRouter(prefix="/api", tags=["admin"])
 
