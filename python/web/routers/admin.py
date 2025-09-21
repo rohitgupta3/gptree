@@ -80,7 +80,7 @@ def seed_turns(
 
     try:
         # user_id = session.scalars(select(User).)
-        seed.seed_turns(session)
+        seed.seed_turns_broken(session)
         return True
     except Exception as e:
         print(e)
@@ -114,7 +114,7 @@ def seed_users(session: Session = Depends(get_session)):
     """
     try:
         _ = seed_user(session)
-        turn_success = seed.seed_turns(session)
+        turn_success = seed.seed_turns_broken(session)
 
         return SeedResponse(
             success=turn_success,
