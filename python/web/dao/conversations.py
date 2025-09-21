@@ -29,23 +29,31 @@ def get_separable_conversations(session: Session, user_id: UUID) -> list[Turn]:
 
 def get_full_conversation_from_turn_id(session: Session, turn_id: UUID) -> list[Turn]:
     # Traverse up to root
-    # turn_by_id = {}
     current = session.get(Turn, turn_id)
     if not current:
         return []
 
+    earlier = [current]
+
+    # visited_ids = {current.id}
     while current.parent_id:
         current = session.get(Turn, current.parent_id)
+        # visited_ids.add(current.id)
+        earlier = [current, *earlier]
 
-    root = current
+    breakpoint()
 
-    # Traverse down through primary_child_id
+    # Traverse down primary_child_id path as long as it's part of the original lineage
     ordered_turns = []
-    current = root
+    current = session.get(Turn, turn_id)
+    if not current.primary_child_id:
+        return earlier
+    current = session.get(Turn, current.primary_child_id)
     while current:
-        ordered_turns.append(current)
+        earlier.append(current)
         if not current.primary_child_id:
             break
-        current = session.get(Turn, current.primary_child_id)
+        next_turn = session.get(Turn, current.primary_child_id)
+        current = next_turn
 
-    return ordered_turns
+    return earlier
