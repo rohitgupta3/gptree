@@ -64,3 +64,32 @@ def test_separable_conversation(db_session: Session):
     assert sorted(expected_ids) == sorted(
         [conversation.id for conversation in separable_conversations]
     )
+
+
+def test_full_conversation_from_identifying_turn_id(db_session: Session):
+    user = User(uid="test_uid_123", email="test@example.com")
+    db_session.add(user)
+    db_session.commit()
+
+    seed.seed_turns(db_session, user.id)
+
+    # Grab the turn whose human_text is the identifying input
+    stmt = select(Turn).where(
+        Turn.human_text == "Can you explain to me the basics of semiconductors first?"
+    )
+    identifying_turn = db_session.exec(stmt).one()
+
+    # Import function under test
+    from web.dao.conversations import get_full_conversation_from_turn_id
+
+    full_convo = get_full_conversation_from_turn_id(db_session, identifying_turn.id)
+
+    # Assert expected sequence
+    expected_texts = [
+        "Can you explain to me the BJT (semiconductor)?",
+        "Can you explain to me the basics of semiconductors first?",
+        "Can you explain the p-n junction?",
+        "What’s the difference between “p-side” and “p-terminal”?",
+    ]
+
+    assert [turn.human_text for turn in full_convo] == expected_texts
