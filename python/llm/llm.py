@@ -28,18 +28,6 @@ def gemini_with_fallback(session: Session, turn_id: UUID) -> None:
 
 
 def gemini_with_history(session: Session, turn_id: UUID) -> None:
-    # for item in history:
-    #     if item["role"] == "user":
-    #         user_symbol = "👤 You"
-    #     elif item["role"] == "model":
-    #         user_symbol = "🤖 Bot"
-    #     print(f"\n{user_symbol}: {item['parts'][0]['text']}")
-
-    # # Initialize the client and chat
-    # client = genai.Client()
-    # # chat = client.chats.create(model="gemini-2.5-flash", history=history)
-    # chat = client.chats.create(model="gemini-2.5-flash", history=history)
-
     # Get the turn to access the human text
     turn = session.get(Turn, turn_id)
     if not turn:
