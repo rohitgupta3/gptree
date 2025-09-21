@@ -15,19 +15,22 @@ MODEL = "gemini-2.5-flash-lite"
 USE_GEMINI = os.environ["USE_GEMINI"] == "1"
 
 
-def gemini_with_fallback(session: Session, turn_id: UUID) -> None:
+def gemini_with_fallback(
+    session: Session, turn_id: UUID, *, create_title: bool = False
+) -> None:
     """
     Stub function for Gemini API interaction.
     In the real implementation, this would call the actual Gemini API.
     """
     if USE_GEMINI:
-        # return gemini(session, turn_id)
-        return gemini_with_history(session, turn_id)
+        return gemini_with_history(session, turn_id, create_title=create_title)
     else:
-        return gemini_fallback(session, turn_id)
+        return gemini_fallback(session, turn_id, create_title=create_title)
 
 
-def gemini_with_history(session: Session, turn_id: UUID) -> None:
+def gemini_with_history(
+    session: Session, turn_id: UUID, *, create_title: bool = False
+) -> None:
     # Get the turn to access the human text
     turn = session.get(Turn, turn_id)
     if not turn:
@@ -58,11 +61,25 @@ def gemini_with_history(session: Session, turn_id: UUID) -> None:
     chat = client.chats.create(model=MODEL, history=history)
     response = chat.send_message(turn.human_text)
     turn.bot_text = response.text
+    # Don't think we need this
     session.add(turn)
     session.commit()
 
+    try:
+        chat_for_title = client.chats.create(model=MODEL, history=history)
+        response = chat_for_title.send_message(
+            "Make a very short title for this chat, i.e. summarize the point of it in two or three words, no formatting at all"
+        )
+        turn.title = response.text[:50]
+        session.add(turn)
+        session.commit()
+    except Exception as e:
+        print(e)
 
-def gemini_fallback(session: Session, turn_id: UUID) -> None:
+
+def gemini_fallback(
+    session: Session, turn_id: UUID, *, create_title: bool = False
+) -> None:
     # Get the turn to access the human text
     turn = session.get(Turn, turn_id)
     if not turn:

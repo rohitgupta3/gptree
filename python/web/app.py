@@ -135,7 +135,7 @@ async def create_conversation(
 
     try:
         # Call the Gemini stub to generate a response
-        gemini_with_fallback(session, turn_id)
+        gemini_with_fallback(session, turn_id, create_title=True)
     except Exception as e:
         # If the stub fails, we should still return the turn ID
         # but log the error for debugging
@@ -228,7 +228,7 @@ def branch_reply_to_conversation(
     )
 
     try:
-        gemini_with_fallback(session, new_turn.id)
+        gemini_with_fallback(session, new_turn.id, create_title=True)
     except Exception as e:
         print(f"Branch stub failed: {e}")
 
