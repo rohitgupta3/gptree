@@ -79,7 +79,7 @@ function Home({ userData }: { userData: FirebaseUser | null }) {
 
       // Redirect to chat/{conversation_UUID}/{turn_UUID}
       // Since this is the first turn, conversation_UUID and turn_UUID are the same
-      navigate(`/chat/${data.turn_id}/${data.turn_id}`);
+      navigate(`/chat/${data.turn_id}`);
     } catch (error) {
       console.error("Error creating conversation:", error);
       alert(
