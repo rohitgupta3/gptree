@@ -21,6 +21,7 @@ from database.database import get_session
 from llm.llm import _stub_gemini
 from web.routers import admin
 from web.schemas.user import CurrentUser
+from web.dao import conversations
 
 
 authenticate_to_firebase()
@@ -139,20 +140,10 @@ def list_conversations(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    turns = session.exec(
-        select(Turn)
-        .where(Turn.user_id == user.id, Turn.parent_id == None)  # noqa: E711
-        .order_by(Turn.created_at.desc())
-    ).all()
-
-    def format_title(t: Turn) -> str:
-        if not t.human_text:
-            return "Untitled - branch"
-        orig = t.human_text.strip().split("\n")[0][:40]
-        return f"{orig} - branch"
+    turns = conversations.get_separable_conversations(session, user.id)
 
     return [
-        ConversationListItem(id=t.id, title=format_title(t), created_at=t.created_at)
+        ConversationListItem(id=t.id, title=t.title, created_at=t.created_at)
         for t in turns
     ]
 
