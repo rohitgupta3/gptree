@@ -1,5 +1,6 @@
 import importlib
 import pkgutil
+import pytest
 from unittest.mock import patch, Mock
 
 from fastapi.testclient import TestClient
@@ -20,11 +21,35 @@ engine = create_engine(
 )
 
 
-# Override the get_session dependency
+@pytest.fixture(name="db_session")
+def db_session_fixture():
+    """
+    A transactional fixture that yields a database session and
+    rolls back the transaction after the test.
+    """
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
+
+    # Import all models to ensure they are registered with the engine's metadata
+    # This is done here to ensure the tables exist before the first test
+    # but the transaction handles the cleanup for each test
+    import_modules("models")
+    MAIN.create_all(bind=engine)
+
+    # Use a try/finally block to ensure the session and connection are closed
+    try:
+        yield session
+    finally:
+        session.close()
+        transaction.rollback()
+        connection.close()
+
+
 def override_get_session():
     """Provides a mocked database session for testing."""
-    with Session(engine) as session:
-        yield session
+    # This dependency will be overridden by the db_session fixture
+    pass
 
 
 # Define a mock for the current user to bypass the authentication dependency
@@ -45,8 +70,6 @@ app.dependency_overrides[get_current_user] = override_get_current_user
 client = TestClient(app)
 
 
-# Create test database
-# TODO: DRY this with everywhere else
 def import_modules(package, recursive=True):
     """
     Import all submodules of a module, recursively, including subpackages.
@@ -62,15 +85,13 @@ def import_modules(package, recursive=True):
             import_modules(full_name)
 
 
-# Import all models recursively under python/models, this allows the DB reset to work
-import_modules("models")
-MAIN.create_all(bind=engine)
-
-
-def test_create_user():
+def test_create_user(db_session: Session):
     """Tests the create_user endpoint."""
     # Define the payload
     payload = {"uid": "test_uid_123", "email": "test@example.com"}
+
+    # Use a custom dependency override for this test to inject our fixture session
+    app.dependency_overrides[get_session] = lambda: db_session
 
     # Make the POST request
     response = client.post("/api/user", json=payload)
@@ -83,25 +104,23 @@ def test_create_user():
     assert "user_id" in data
 
     # You can also verify the user was added to the mock database
-    with Session(engine) as session:
-        user = session.exec(select(User).where(User.uid == "test_uid_123")).first()
-        assert user is not None
-        assert user.email == "test@example.com"
+    user = db_session.exec(select(User).where(User.uid == "test_uid_123")).first()
+    assert user is not None
+    assert user.email == "test@example.com"
 
 
 @patch("web.app._stub_gemini")
-def test_create_conversation(mock_stub_gemini: Mock):
+def test_create_conversation(mock_stub_gemini: Mock, db_session: Session):
     """
     Tests the create_conversation endpoint and verifies a Turn is created.
     Uses mock.patch to simulate the gemini stub call.
     """
     # Create a user in the test database since the endpoint requires it.
     # The uid must match the one returned by the mocked get_current_user.
-    with Session(engine) as session:
-        user = User(uid="test_uid_123", email="test@example.com")
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+    user = User(uid="test_uid_123", email="test@example.com")
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
 
     # Define the behavior of the mock stub
     # It should modify the bot_text field of the Turn object
@@ -116,6 +135,9 @@ def test_create_conversation(mock_stub_gemini: Mock):
     # Define the request payload
     payload = {"text": "Hello, Gemini!"}
 
+    # Use a custom dependency override for this test to inject our fixture session
+    app.dependency_overrides[get_session] = lambda: db_session
+
     # Make the POST request to create a conversation
     response = client.post("/api/conversation/create", json=payload)
 
@@ -128,14 +150,13 @@ def test_create_conversation(mock_stub_gemini: Mock):
     turn_id = response_data["turn_id"]
 
     # Verify that the Turn was created in the database
-    with Session(engine) as session:
-        db_turn = session.exec(select(Turn).where(Turn.id == turn_id)).one()
-        assert db_turn is not None
-        assert db_turn.human_text == "Hello, Gemini!"
-        assert db_turn.user_id == user.id
-        assert db_turn.parent_turn_id is None
-        # Verify that the mock successfully mutated the Turn's bot_text
-        assert db_turn.bot_text == "Mocked bot response."
+    db_turn = db_session.exec(select(Turn).where(Turn.id == turn_id)).one()
+    assert db_turn is not None
+    assert db_turn.human_text == "Hello, Gemini!"
+    assert db_turn.user_id == user.id
+    assert db_turn.parent_turn_id is None
+    # Verify that the mock successfully mutated the Turn's bot_text
+    assert db_turn.bot_text == "Mocked bot response."
 
     # Verify that the mocked stub was called with the correct arguments
     # with a MockSession, which should be fine.
