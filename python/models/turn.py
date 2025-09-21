@@ -1,9 +1,13 @@
 from uuid import UUID, uuid4
 from datetime import datetime
+
 from sqlmodel import SQLModel, Field, Column
-from sqlalchemy import DateTime, func
-from sqlalchemy_utils import UUIDType
 import sqlalchemy
+from sqlalchemy import DateTime, func
+from sqlalchemy.dialects import postgresql
+import sqlalchemy_utils
+from sqlalchemy_utils import UUIDType
+
 from models.metadata import MAIN
 
 
@@ -28,7 +32,13 @@ class Turn(SQLModel, table=True):
         )
     )
 
-    parent_turn_id: UUID | None
+    parent_id: UUID | None
+    # children_turn_ids: list[UUID]
+    primary_child_id: UUID | None
+    branched_child_ids: list[UUID] = Field(
+        sa_type=postgresql.ARRAY(sqlalchemy_utils.UUIDType),
+        default_factory=list,
+    )
     user_id: UUID
     human_text: str
     model: str
