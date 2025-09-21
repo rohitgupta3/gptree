@@ -145,7 +145,7 @@ def list_conversations(
 
     return [
         ConversationListItem(
-            root_turn_id=t.id,
+            root_turn_id=t.id,  # TODO: this is wrong
             identifying_turn_id=t.id,  # or another ID if you track branches separately
             title=t.title,
             created_at=t.created_at,
