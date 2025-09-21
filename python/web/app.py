@@ -213,35 +213,15 @@ def reset_database(session: Session = Depends(get_session)):
         raise HTTPException(status_code=500, detail=f"Reset failed: {e}")
 
 
+# TODO: replace with /.health
 @app.get("/status")
 def get_status():
     return JSONResponse(content={"success": True})
 
 
-@app.get("/api/test", response_model=StatusResponse)
-def test_connection():
-    """Simple test endpoint to verify frontend-backend communication"""
-    return StatusResponse(success=True, message="Backend is working correctly!")
-
-
 @app.get("/api/me", response_model=CurrentUser)
 async def read_me(user: CurrentUser = Depends(get_current_user)):
-    print(user)
     return user
-
-
-@app.get("/api/user/{user_id}", response_model=UserDataResponse)
-def get_user(user_id: str, session: Session = Depends(get_session)):
-    try:
-        user_uuid = UUID(user_id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user ID format")
-
-    user = session.get(User, user_uuid)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return UserDataResponse(user_id=str(user.id))
 
 
 @app.post("/api/user", response_model=UserDataResponse)
