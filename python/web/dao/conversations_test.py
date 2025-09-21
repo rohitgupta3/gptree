@@ -49,9 +49,21 @@ def test_separable_conversation(db_session: Session):
 
     seed.seed_turns(db_session, user.id)
     separable_conversations = conversations.get_separable_conversations(db_session)
-    breakpoint()
-    pass
+    # breakpoint()
+    # pass
     assert len(separable_conversations) == 3
+
+    # TODO: hardcoded to same text in seed, a bit brittle
+    texts = [
+        "Can you explain to me the BJT (semiconductor)?",
+        "Can you explain to me the basics of semiconductors first?",
+        "Why does the depletion region create an electric field?",
+    ]
+    stmt = select(Turn).where(Turn.human_text.in_(texts))
+    expected_ids = [row.id for row in db_session.exec(stmt).all()]
+    assert sorted(expected_ids) == sorted(
+        [conversation.id for conversation in separable_conversations]
+    )
     # expected_titles = [
     #     "Explain BJT",
 
