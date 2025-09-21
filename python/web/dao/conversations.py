@@ -60,6 +60,8 @@ def get_full_conversation_from_turn_id(
     return earlier
 
 
+# Double-check that the last turn in a conversation is being returned, not the identifying
+# turn ID for a conversation
 def reply_to_turn(
     session: Session,
     user_id: UUID,
