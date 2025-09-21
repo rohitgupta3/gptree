@@ -20,7 +20,7 @@ from firebase_admin import auth as fb_auth, credentials
 from models.metadata import MAIN  # This is your MetaData(schema="main")
 from models.user import User
 from models.turn import Turn  # Added import for Turn model
-from web.database import get_session
+from database import get_session
 
 project_id = os.getenv("FIREBASE_PROJECT_ID")
 client_email = os.getenv("FIREBASE_CLIENT_EMAIL")
