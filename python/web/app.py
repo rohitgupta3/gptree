@@ -18,7 +18,7 @@ from auth.firebase import (
 from models.user import User
 from models.turn import Turn
 from database.database import get_session
-from llm.llm import _stub_gemini
+from llm.llm import gemini_with_fallback
 from web.routers import admin
 from web.schemas.user import CurrentUser
 from web.dao import conversations
@@ -135,7 +135,7 @@ async def create_conversation(
 
     try:
         # Call the Gemini stub to generate a response
-        _stub_gemini(session, turn_id)
+        gemini_with_fallback(session, turn_id)
     except Exception as e:
         # If the stub fails, we should still return the turn ID
         # but log the error for debugging
@@ -203,7 +203,7 @@ def reply_to_conversation(
 
     # Optional: call Gemini stub to populate bot_text
     try:
-        _stub_gemini(session, new_turn.id)
+        gemini_with_fallback(session, new_turn.id)
     except Exception as e:
         print(f"Stub failed: {e}")
 
@@ -228,7 +228,7 @@ def branch_reply_to_conversation(
     )
 
     try:
-        _stub_gemini(session, new_turn.id)
+        gemini_with_fallback(session, new_turn.id)
     except Exception as e:
         print(f"Branch stub failed: {e}")
 
