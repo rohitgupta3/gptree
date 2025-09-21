@@ -57,30 +57,22 @@ function Home({
 
   const handleCreateConversation = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!conversationText.trim() || !userData) {
-      return;
-    }
+    if (!conversationText.trim() || !userData) return;
 
     setIsCreatingConversation(true);
 
     try {
       const user = auth.currentUser;
-      if (!user) {
-        throw new Error("No authenticated user");
-      }
+      if (!user) throw new Error("No authenticated user");
 
       const token = await user.getIdToken();
-
       const response = await fetch(`${apiHost}/api/conversation/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          text: conversationText,
-        }),
+        body: JSON.stringify({ text: conversationText }),
       });
 
       if (!response.ok) {
@@ -89,13 +81,8 @@ function Home({
       }
 
       const data = await response.json();
-
-      // Redirect to chat/{conversation_UUID}/{turn_UUID}
-      // Since this is the first turn, conversation_UUID and turn_UUID are the same
       navigate(`/chat/${data.turn_id}`);
-      if (onNewConversation) {
-        onNewConversation(); // ⬅ Trigger refresh of sidebar
-      }
+      onNewConversation?.();
     } catch (error) {
       console.error("Error creating conversation:", error);
       alert(
@@ -111,59 +98,65 @@ function Home({
   return (
     <>
       <h1>GPTree</h1>
-
       <div className="card">
-        {userData && (
-          <>
-            <div className="new-conversation">
-              <h3>Start a New Conversation</h3>
-              <form onSubmit={handleCreateConversation}>
-                <textarea
-                  value={conversationText}
-                  onChange={(e) => setConversationText(e.target.value)}
-                  placeholder="What would you like to talk about?"
-                  rows={4}
-                  cols={50}
-                  style={{
-                    width: "100%",
-                    maxWidth: "700px",
-                    padding: "10px",
-                    margin: "10px 0",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                    fontSize: "14px",
-                    fontFamily: "inherit",
-                  }}
-                  disabled={isCreatingConversation}
-                />
-                <br />
-                <button
-                  type="submit"
-                  disabled={!conversationText.trim() || isCreatingConversation}
-                  style={{
-                    backgroundColor: "#6c757d",
-                    color: "white",
-                    padding: "10px 20px",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor:
-                      isCreatingConversation || !conversationText.trim()
-                        ? "not-allowed"
-                        : "pointer",
-                    fontSize: "16px",
-                    opacity:
-                      isCreatingConversation || !conversationText.trim()
-                        ? 0.6
-                        : 1,
-                  }}
-                >
-                  {isCreatingConversation
-                    ? "Creating..."
-                    : "Start Conversation"}
-                </button>
-              </form>
-            </div>
-          </>
+        {userData ? (
+          <div className="new-conversation">
+            <h3>Start a New Conversation</h3>
+            <form onSubmit={handleCreateConversation}>
+              <textarea
+                value={conversationText}
+                onChange={(e) => setConversationText(e.target.value)}
+                placeholder="What would you like to talk about?"
+                rows={4}
+                cols={50}
+                style={{
+                  width: "100%",
+                  maxWidth: "700px",
+                  padding: "10px",
+                  margin: "10px 0",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                }}
+                disabled={isCreatingConversation}
+              />
+              <br />
+              <button
+                type="submit"
+                disabled={!conversationText.trim() || isCreatingConversation}
+                style={{
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  padding: "10px 20px",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor:
+                    isCreatingConversation || !conversationText.trim()
+                      ? "not-allowed"
+                      : "pointer",
+                  fontSize: "16px",
+                  opacity:
+                    isCreatingConversation || !conversationText.trim()
+                      ? 0.6
+                      : 1,
+                }}
+              >
+                {isCreatingConversation ? "Creating..." : "Start Conversation"}
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div
+            style={{
+              padding: "20px",
+              fontSize: "16px",
+              color: "#6c757d",
+              fontStyle: "italic",
+            }}
+          >
+            Please log in to get started.
+          </div>
         )}
       </div>
     </>
