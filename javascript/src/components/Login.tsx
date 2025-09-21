@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,6 +21,9 @@ function Login() {
         // Signed in
         const user = userCredential.user;
         console.log("User signed in:", user);
+
+        // Redirect to Home. TODO: should we refer to this by name of component instead?
+        navigate("/");
       })
       .catch((error) => {
         const errorCode = error.code;

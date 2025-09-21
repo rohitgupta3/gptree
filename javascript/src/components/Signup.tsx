@@ -41,7 +41,7 @@ function Signup() {
           throw new Error("Failed to create user in backend");
         }
 
-        // Redirect to Home
+        // Redirect to Home. TODO: should we refer to this by name of component instead?
         navigate("/");
       })
       .catch((error) => {
