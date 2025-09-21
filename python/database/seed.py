@@ -1,12 +1,16 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 from uuid import uuid4, UUID
+from models.user import User
 from models.turn import Turn  # Adjust if Turn is elsewhere
 from datetime import datetime
 from typing import Optional
 
 
 # TODO: vet this
-def seed_turns(session: Session, user_id: UUID):
+def seed_turns(session: Session, user_id: UUID | None = None):
+    if user_id is None:
+        user = session.scalars(select(User).where(User.email == "test@test.com")).one()
+        user_id = user.id
     # Each item is a column (linear chain). Each entry is a (human_text, bot_text) pair.
     conversations = [
         [  # Column 1 (purple)
@@ -80,4 +84,4 @@ if __name__ == "__main__":
     from database.database import engine
 
     with Session(engine) as session:
-        seed_turns(session, user_id=UUID("a0afda00-2249-4c09-92dd-d0888468a47a"))
+        seed_turns(session)
