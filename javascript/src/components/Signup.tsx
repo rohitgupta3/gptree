@@ -63,11 +63,11 @@ function Signup() {
         {error && (
           <div
             style={{
-              color: "red",
+              color: "#dc3545",
               marginBottom: "15px",
               padding: "10px",
-              backgroundColor: "#fee",
-              border: "1px solid #fcc",
+              backgroundColor: "#f8d7da",
+              border: "1px solid #f5c6cb",
               borderRadius: "4px",
             }}
           >
@@ -94,6 +94,7 @@ function Signup() {
               padding: "8px",
               border: "1px solid #ccc",
               borderRadius: "4px",
+              boxSizing: "border-box",
             }}
           />
         </div>
@@ -117,6 +118,7 @@ function Signup() {
               padding: "8px",
               border: "1px solid #ccc",
               borderRadius: "4px",
+              boxSizing: "border-box",
             }}
           />
         </div>
@@ -125,12 +127,14 @@ function Signup() {
           type="submit"
           disabled={loading}
           style={{
-            backgroundColor: loading ? "#ccc" : "#007bff",
+            backgroundColor: "#6c757d",
             color: "white",
             padding: "10px 20px",
             border: "none",
             borderRadius: "4px",
             cursor: loading ? "not-allowed" : "pointer",
+            fontSize: "16px",
+            opacity: loading ? 0.6 : 1,
           }}
         >
           {loading ? "Creating Account..." : "Submit"}
@@ -138,8 +142,26 @@ function Signup() {
       </form>
 
       <div style={{ marginTop: "20px" }}>
-        <Link to="/" style={{ color: "#007bff", textDecoration: "none" }}>
+        <Link
+          to="/"
+          style={{
+            color: "#6c757d",
+            textDecoration: "none",
+            fontSize: "14px",
+          }}
+        >
           ← Back to Home
+        </Link>
+        {" | "}
+        <Link
+          to="/login"
+          style={{
+            color: "#6c757d",
+            textDecoration: "none",
+            fontSize: "14px",
+          }}
+        >
+          Already have an account? Login
         </Link>
       </div>
     </div>
