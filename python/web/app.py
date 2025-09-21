@@ -25,15 +25,6 @@ from web.schemas.user import CurrentUser
 authenticate_to_firebase()
 
 
-# class CurrentUser(BaseModel):
-#     uid: str
-#     email: str
-#     name: str | None = None
-#     picture: str | None = None
-#     email_verified: bool | None = None
-#     claims: dict[str, Any] = {}
-
-
 class CreateUserRequest(BaseModel):
     uid: str
     email: str
@@ -129,6 +120,40 @@ async def create_conversation(
         print(f"Error calling Gemini stub: {e}")
 
     return CreateConversationResponse(turn_id=turn_id)
+
+
+class ConversationListItem(BaseModel):
+    root_turn_id: UUID
+    identifying_turn_id: UUID
+    title: str
+    created_at: datetime
+
+
+@app.get("/api/conversations", response_model=list[ConversationListItem])
+def list_conversations(
+    current_user: CurrentUser = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    user = session.exec(select(User).where(User.uid == current_user.uid)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    turns = session.exec(
+        select(Turn)
+        .where(Turn.user_id == user.id, Turn.parent_id == None)  # noqa: E711
+        .order_by(Turn.created_at.desc())
+    ).all()
+
+    def format_title(t: Turn) -> str:
+        if not t.human_text:
+            return "Untitled - branch"
+        orig = t.human_text.strip().split("\n")[0][:40]
+        return f"{orig} - branch"
+
+    return [
+        ConversationListItem(id=t.id, title=format_title(t), created_at=t.created_at)
+        for t in turns
+    ]
 
 
 app.include_router(admin.router)
