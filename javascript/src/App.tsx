@@ -135,11 +135,17 @@ function App() {
       <div
         style={{
           position: "absolute",
-          top: "20px",
-          left: "20px",
+          top: 0,
+          left: 0,
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "20px",
           zIndex: 1000,
         }}
       >
+        {/* Reset DB on the left */}
         <button
           onClick={handleResetDatabase}
           style={{
@@ -154,64 +160,55 @@ function App() {
         >
           Reset DB
         </button>
-      </div>
 
-      {/* Auth buttons */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          zIndex: 1000,
-          display: "flex",
-          gap: "10px",
-        }}
-      >
-        {userData ? (
-          <button
-            onClick={handleLogout}
-            style={{
-              backgroundColor: "#dc3545",
-              color: "white",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            Logout
-          </button>
-        ) : (
-          <>
-            <Link
-              to="/login"
+        {/* Auth buttons on the right */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          {userData ? (
+            <button
+              onClick={handleLogout}
               style={{
-                backgroundColor: "#6c757d",
+                backgroundColor: "#dc3545",
                 color: "white",
                 padding: "8px 16px",
-                textDecoration: "none",
                 borderRadius: "4px",
+                border: "none",
+                cursor: "pointer",
                 fontSize: "14px",
               }}
             >
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              style={{
-                backgroundColor: "#007bff",
-                color: "white",
-                padding: "8px 16px",
-                textDecoration: "none",
-                borderRadius: "4px",
-                fontSize: "14px",
-              }}
-            >
-              Sign Up
-            </Link>
-          </>
-        )}
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                style={{
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  padding: "8px 16px",
+                  textDecoration: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                }}
+              >
+                Login
+              </Link>
+              <Link
+                to="/signup"
+                style={{
+                  backgroundColor: "#007bff",
+                  color: "white",
+                  padding: "8px 16px",
+                  textDecoration: "none",
+                  borderRadius: "4px",
+                  fontSize: "14px",
+                }}
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Main content */}
