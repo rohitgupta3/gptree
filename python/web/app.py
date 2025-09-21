@@ -19,6 +19,7 @@ from firebase_admin import auth as fb_auth, credentials
 
 from models.metadata import MAIN  # This is your MetaData(schema="main")
 from models.user import User
+from models.turn import Turn  # Added import for Turn model
 from web.database import get_session
 
 project_id = os.getenv("FIREBASE_PROJECT_ID")
@@ -64,6 +65,14 @@ class CurrentUser(BaseModel):
 class CreateUserRequest(BaseModel):
     uid: str
     email: str
+
+
+class CreateConversationRequest(BaseModel):
+    text: str
+
+
+class CreateConversationResponse(BaseModel):
+    turn_id: UUID
 
 
 def verify_firebase_token(token: str) -> dict[str, Any]:
@@ -113,6 +122,27 @@ async def get_current_user(
         email_verified=decoded.get("email_verified"),
         claims=custom_claims,
     )
+
+
+async def _stub_gemini(session: Session, turn_id: UUID) -> str:
+    """
+    Stub function for Gemini API interaction.
+    In the real implementation, this would call the actual Gemini API.
+    """
+    # Get the turn to access the human text
+    turn = session.get(Turn, turn_id)
+    if not turn:
+        raise ValueError(f"Turn {turn_id} not found")
+
+    # Generate a simple response based on the human input
+    bot_response = f"I see that you said {turn.human_text}"
+
+    # Update the turn with the bot response
+    turn.bot_text = bot_response
+    session.add(turn)
+    session.commit()
+
+    return bot_response
 
 
 app = FastAPI(title="Simple User Project API")
@@ -200,16 +230,6 @@ async def read_me(user: CurrentUser = Depends(get_current_user)):
     return user
 
 
-@app.get("/api/user", response_model=UserDataResponse)
-# def get_current_user(session: Session = Depends(get_session)):
-def get_current_user(request: Request, session: Session = Depends(get_session)):
-    user = session.scalars(select(User)).one()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return UserDataResponse(user_id=str(user.id))
-
-
 @app.get("/api/user/{user_id}", response_model=UserDataResponse)
 def get_user(user_id: str, session: Session = Depends(get_session)):
     try:
@@ -236,6 +256,47 @@ def create_user(payload: CreateUserRequest, session: Session = Depends(get_sessi
     session.refresh(user)
 
     return UserDataResponse(user_id=str(user.id))
+
+
+@app.post("/api/conversation/create", response_model=CreateConversationResponse)
+async def create_conversation(
+    payload: CreateConversationRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    """
+    Create a new conversation by creating the initial turn and generating a response
+    """
+    # First, get the User record from the database using the Firebase UID
+    user = session.exec(select(User).where(User.uid == current_user.uid)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found in database")
+
+    # Create a new Turn with the user's input
+    turn = Turn(
+        user_id=user.id,
+        human_text=payload.text,
+        parent_turn_id=None,  # This is the root turn of a new conversation
+        model="gemini-2.5-flash",
+        bot_text=None,  # Will be filled by the stub function
+    )
+
+    session.add(turn)
+    session.commit()
+    session.refresh(turn)
+
+    # Get the turn ID before calling the stub
+    turn_id = turn.id
+
+    try:
+        # Call the Gemini stub to generate a response
+        await _stub_gemini(session, turn_id)
+    except Exception as e:
+        # If the stub fails, we should still return the turn ID
+        # but log the error for debugging
+        print(f"Error calling Gemini stub: {e}")
+
+    return CreateConversationResponse(turn_id=turn_id)
 
 
 @app.get("/{full_path:path}")

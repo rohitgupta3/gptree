@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import "./App.css";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
@@ -20,6 +20,59 @@ interface FirebaseUser {
 
 function Home({ userData }: { userData: FirebaseUser | null }) {
   const [count, setCount] = useState(0);
+  const [conversationText, setConversationText] = useState("");
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCreateConversation = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!conversationText.trim() || !userData) {
+      return;
+    }
+
+    setIsCreatingConversation(true);
+
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("No authenticated user");
+      }
+
+      const token = await user.getIdToken();
+
+      const response = await fetch(`${apiHost}/api/conversation/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          text: conversationText,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to create conversation");
+      }
+
+      const data = await response.json();
+
+      // Redirect to chat/{conversation_UUID}/{turn_UUID}
+      // Since this is the first turn, conversation_UUID and turn_UUID are the same
+      navigate(`/chat/${data.turn_id}/${data.turn_id}`);
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      alert(
+        `Failed to create conversation: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsCreatingConversation(false);
+    }
+  };
 
   return (
     <>
@@ -31,31 +84,107 @@ function Home({ userData }: { userData: FirebaseUser | null }) {
         </button>
 
         {userData && (
-          <div className="user-info">
-            <h2>User Info</h2>
-            <p>
-              <strong>UID:</strong> {userData.uid}
-            </p>
-            {userData.email && (
+          <>
+            <div className="user-info">
+              <h2>User Info</h2>
               <p>
-                <strong>Email:</strong> {userData.email}
+                <strong>UID:</strong> {userData.uid}
               </p>
-            )}
-            {userData.name && (
-              <p>
-                <strong>Name:</strong> {userData.name}
-              </p>
-            )}
-            {userData.picture && (
-              <p>
-                <strong>Picture:</strong>{" "}
-                <img src={userData.picture} alt="User" width="50" />
-              </p>
-            )}
-          </div>
+              {userData.email && (
+                <p>
+                  <strong>Email:</strong> {userData.email}
+                </p>
+              )}
+              {userData.name && (
+                <p>
+                  <strong>Name:</strong> {userData.name}
+                </p>
+              )}
+              {userData.picture && (
+                <p>
+                  <strong>Picture:</strong>{" "}
+                  <img src={userData.picture} alt="User" width="50" />
+                </p>
+              )}
+            </div>
+
+            <div className="new-conversation">
+              <h3>Start a New Conversation</h3>
+              <form onSubmit={handleCreateConversation}>
+                <textarea
+                  value={conversationText}
+                  onChange={(e) => setConversationText(e.target.value)}
+                  placeholder="What would you like to talk about?"
+                  rows={4}
+                  cols={50}
+                  style={{
+                    width: "100%",
+                    maxWidth: "500px",
+                    padding: "10px",
+                    margin: "10px 0",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    fontSize: "14px",
+                    fontFamily: "inherit",
+                  }}
+                  disabled={isCreatingConversation}
+                />
+                <br />
+                <button
+                  type="submit"
+                  disabled={!conversationText.trim() || isCreatingConversation}
+                  style={{
+                    backgroundColor:
+                      isCreatingConversation || !conversationText.trim()
+                        ? "#6c757d"
+                        : "#007bff",
+                    color: "white",
+                    padding: "10px 20px",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor:
+                      isCreatingConversation || !conversationText.trim()
+                        ? "not-allowed"
+                        : "pointer",
+                    fontSize: "16px",
+                  }}
+                >
+                  {isCreatingConversation
+                    ? "Creating..."
+                    : "Start Conversation"}
+                </button>
+              </form>
+            </div>
+          </>
         )}
       </div>
     </>
+  );
+}
+
+// Placeholder Chat component for the new route
+function Chat() {
+  const navigate = useNavigate();
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Chat Interface</h1>
+      <p>This is a placeholder for the chat interface.</p>
+      <p>Scrolling to specific turn will be implemented later.</p>
+      <button
+        onClick={() => navigate("/")}
+        style={{
+          backgroundColor: "#6c757d",
+          color: "white",
+          padding: "10px 20px",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+        }}
+      >
+        Back to Home
+      </button>
+    </div>
   );
 }
 
@@ -223,6 +352,7 @@ function App() {
             <Route path="/" element={<Home userData={userData} />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/chat/:conversationId/:turnId" element={<Chat />} />
           </Routes>
         )}
       </div>
