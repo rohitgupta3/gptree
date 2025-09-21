@@ -93,7 +93,7 @@ async def get_current_user(
     )
 
 
-async def _stub_gemini(session: Session, turn_id: UUID) -> str:
+def _stub_gemini(session: Session, turn_id: UUID) -> None:
     """
     Stub function for Gemini API interaction.
     In the real implementation, this would call the actual Gemini API.
@@ -110,8 +110,6 @@ async def _stub_gemini(session: Session, turn_id: UUID) -> str:
     turn.bot_text = bot_response
     session.add(turn)
     session.commit()
-
-    return bot_response
 
 
 app = FastAPI(title="Simple User Project API")
@@ -190,7 +188,7 @@ async def create_conversation(
     try:
         # Call the Gemini stub to generate a response
         # TODO: explore removing async/await here
-        await _stub_gemini(session, turn_id)
+        _stub_gemini(session, turn_id)
     except Exception as e:
         # If the stub fails, we should still return the turn ID
         # but log the error for debugging
