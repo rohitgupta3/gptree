@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, create_engine, select
 from sqlalchemy.pool import StaticPool
 
+from database import create_all_tables
 from web.app import app, get_session, get_current_user, CurrentUser
 from models.metadata import MAIN
 from models.user import User
@@ -21,24 +22,26 @@ engine = create_engine(
 )
 
 
-def import_modules(package, recursive=True):
-    """
-    Import all submodules of a module, recursively, including subpackages.
-    """
-    if isinstance(package, str):
-        package = importlib.import_module(package)
-    for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
-        if "." in name:
-            continue
-        full_name = package.__name__ + "." + name
-        importlib.import_module(full_name)
-        if recursive and is_pkg:
-            import_modules(full_name)
+# # TODO: can we extract this logic somewhere
+# def import_modules(package, recursive=True):
+#     """
+#     Import all submodules of a module, recursively, including subpackages.
+#     """
+#     if isinstance(package, str):
+#         package = importlib.import_module(package)
+#     for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
+#         if "." in name:
+#             continue
+#         full_name = package.__name__ + "." + name
+#         importlib.import_module(full_name)
+#         if recursive and is_pkg:
+#             import_modules(full_name)
 
 
-# Create the database schema once when the module is imported
-import_modules("models")
-MAIN.create_all(bind=engine)
+# # Create the database schema once when the module is imported
+# import_modules("models")
+# MAIN.create_all(bind=engine)
+create_all_tables(engine)
 
 
 @pytest.fixture(name="db_session")
