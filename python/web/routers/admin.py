@@ -1,7 +1,4 @@
 # TODO: remove this entire module, this is just for quick iteration early on
-import importlib
-import pkgutil
-
 from fastapi import APIRouter, Depends, HTTPException
 from firebase_admin import auth as fb_auth
 from sqlmodel import Session, select
@@ -9,7 +6,6 @@ from sqlalchemy import inspect
 from pydantic import BaseModel
 
 from database import create_all_tables, get_session
-from models.metadata import MAIN
 from models.user import User
 
 
@@ -23,25 +19,6 @@ class StatusResponse(BaseModel):
 
 class SeedUsersResponse(BaseModel):
     success: bool
-
-
-# def import_modules(package, recursive=True):
-#     """
-#     Import all submodules of a module, recursively, including subpackages.
-#     """
-#     if isinstance(package, str):
-#         package = importlib.import_module(package)
-#     for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
-#         if "." in name:
-#             continue
-#         full_name = package.__name__ + "." + name
-#         importlib.import_module(full_name)
-#         if recursive and is_pkg:
-#             import_modules(full_name)
-
-
-# # Import all models recursively under python/models, this allows the DB reset to work
-# import_modules("models")
 
 
 def seed_user(session: Session) -> bool:
@@ -91,16 +68,8 @@ def reset_database(session: Session = Depends(get_session)):
     bind = session.get_bind()
 
     try:
-        # with bind.begin() as conn:
-        #     MAIN.drop_all(bind=conn)
-        #     MAIN.create_all(bind=conn)
-
-        #     inspector = inspect(conn)
-        #     tables = inspector.get_table_names(schema="main")
         with bind.begin() as conn:
             create_all_tables(conn, drop_first=True)
-            # MAIN.drop_all(bind=conn)
-            # MAIN.create_all(bind=conn)
 
             inspector = inspect(conn)
             tables = inspector.get_table_names(schema="main")
