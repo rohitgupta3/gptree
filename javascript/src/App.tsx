@@ -197,6 +197,7 @@ function Chat() {
   const [error, setError] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [isReplying, setIsReplying] = useState(false);
+  const [replyMode, setReplyMode] = useState<"reply" | "branch">("reply");
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,7 +209,13 @@ function Chat() {
 
       setIsReplying(true);
       const token = await user.getIdToken();
-      const res = await fetch(`${apiHost}/api/conversation/reply`, {
+
+      const endpoint =
+        replyMode === "branch"
+          ? `${apiHost}/api/conversation/branch-reply`
+          : `${apiHost}/api/conversation/reply`;
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -315,23 +322,49 @@ function Chat() {
               disabled={isReplying}
             />
             <br />
-            <button
-              type="submit"
-              disabled={!replyText.trim() || isReplying}
-              style={{
-                backgroundColor:
-                  isReplying || !replyText.trim() ? "#6c757d" : "#28a745",
-                color: "white",
-                padding: "10px 20px",
-                border: "none",
-                borderRadius: "4px",
-                cursor:
-                  isReplying || !replyText.trim() ? "not-allowed" : "pointer",
-                fontSize: "16px",
-              }}
-            >
-              {isReplying ? "Replying..." : "Send Reply"}
-            </button>
+            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+              <button
+                type="submit"
+                disabled={!replyText.trim() || isReplying}
+                style={{
+                  backgroundColor:
+                    isReplying || !replyText.trim() ? "#6c757d" : "#007bff",
+                  color: "white",
+                  padding: "10px 20px",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor:
+                    isReplying || !replyText.trim() ? "not-allowed" : "pointer",
+                  fontSize: "16px",
+                }}
+                onClick={() => setReplyMode("reply")}
+              >
+                {isReplying && replyMode === "reply"
+                  ? "Replying..."
+                  : "Send Reply"}
+              </button>
+
+              <button
+                type="submit"
+                disabled={!replyText.trim() || isReplying}
+                style={{
+                  backgroundColor:
+                    isReplying || !replyText.trim() ? "#6c757d" : "#17a2b8",
+                  color: "white",
+                  padding: "10px 20px",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor:
+                    isReplying || !replyText.trim() ? "not-allowed" : "pointer",
+                  fontSize: "16px",
+                }}
+                onClick={() => setReplyMode("branch")}
+              >
+                {isReplying && replyMode === "branch"
+                  ? "Replying..."
+                  : "Branch Reply"}
+              </button>
+            </div>
           </form>
         </>
       )}
@@ -345,6 +378,7 @@ function Chat() {
           border: "none",
           borderRadius: "4px",
           cursor: "pointer",
+          marginTop: "20px",
         }}
       >
         Back to Home
