@@ -155,7 +155,7 @@ async def create_conversation(
     turn = Turn(
         user_id=user.id,
         human_text=payload.text,
-        parent_turn_id=None,  # This is the root turn of a new conversation
+        parent_id=None,  # This is the root turn of a new conversation
         model="gemini-2.5-flash",
         bot_text=None,  # Will be filled by the stub function
     )

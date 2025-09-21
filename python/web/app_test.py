@@ -141,7 +141,7 @@ def test_create_conversation(db_session: Session):
     assert db_turn is not None
     assert db_turn.human_text == "Hello, Gemini!"
     assert db_turn.user_id == user.id
-    assert db_turn.parent_turn_id is None
+    assert db_turn.parent_id is None
     # Verify that the mock successfully mutated the Turn's bot_text
     # assert db_turn.bot_text == "Mocked bot response."
     assert db_turn.bot_text == "I see that you said Hello, Gemini!"
