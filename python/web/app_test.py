@@ -90,7 +90,8 @@ def test_create_user():
 
     # You can also verify the user was added to the mock database
     session = TestingSessionLocal()
-    user = session.execute(select(User).where(User.uid == "test_uid_123")).first()
+    user = session.query(User).filter_by(uid="test_uid_123").first()
+    # user = session.execute(select(User).where(User.uid == "test_uid_123")).first()
     assert user is not None
     assert user.email == "test@example.com"
 
