@@ -1,0 +1,44 @@
+import os
+import pytest
+from unittest.mock import patch, Mock
+
+from fastapi.testclient import TestClient
+from sqlmodel import Session, create_engine, select
+from sqlalchemy.pool import StaticPool
+
+from database.database import create_all_tables
+from models.user import User
+from models.turn import Turn
+
+# TODO: DRY with other test files
+
+DATABASE_URL = os.environ["TEST_DATABASE_URL"]
+
+# Fix for PostgreSQL URLs from Heroku
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(DATABASE_URL)
+
+create_all_tables(engine)
+
+
+@pytest.fixture(name="db_session")
+def db_session_fixture():
+    """
+    A transactional fixture that yields a database session and
+    rolls back the transaction after the test.
+    """
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
+    try:
+        yield session
+    finally:
+        session.close()
+        transaction.rollback()
+        connection.close()
+
+
+def test_create_user(db_session: Session):
+    pass
