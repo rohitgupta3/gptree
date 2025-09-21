@@ -1,12 +1,11 @@
 # TODO: remove this entire module, this is just for quick iteration early on
 from fastapi import APIRouter, Depends, HTTPException
-from firebase_admin import auth as fb_auth
-from sqlmodel import Session, select
+from sqlmodel import Session
 from sqlalchemy import inspect
 from pydantic import BaseModel
 
 from database.database import create_all_tables, get_session
-from models.user import User
+from python.database.seed import seed_users_impl
 
 
 router = APIRouter(prefix="/api", tags=["admin"])
@@ -19,47 +18,6 @@ class StatusResponse(BaseModel):
 
 class SeedUsersResponse(BaseModel):
     success: bool
-
-
-def seed_user(session: Session) -> bool:
-    """
-    Fetch all users from Firebase and sync them to the database.
-    Returns True if it succeeded
-    """
-    try:
-        # Get all users from Firebase (paginated)
-        page = fb_auth.list_users()
-        firebase_users = []
-
-        while page:
-            firebase_users.extend(page.users)
-            page = page.get_next_page() if page.has_next_page else None
-
-        # Process each Firebase user
-        for fb_user in firebase_users:
-            print(fb_user.email)
-            if not fb_user.email:
-                raise ValueError(f"{fb_user} doesn't have an email?")
-
-            # Check if user already exists in DB. TODO: should be `one`?
-            existing_user = session.exec(
-                select(User).where(User.uid == fb_user.uid)
-            ).one_or_none()
-
-            if existing_user:
-                print(f"Already have user with uid {fb_user.uid}")
-            else:
-                # Create new user
-                new_user = User(uid=fb_user.uid, email=fb_user.email)
-                session.add(new_user)
-
-        session.commit()
-        return True
-
-    except Exception as e:
-        print(f"Exception hit, rolling back: {e}")
-        session.rollback()
-        return False
 
 
 # TODO: remove this endpoint in production, at least?
@@ -88,7 +46,7 @@ def seed_users(session: Session = Depends(get_session)):
     This endpoint can be used to populate the database with existing Firebase users.
     """
     try:
-        success = seed_user(session)
+        success = seed_users_impl(session)
 
         return SeedUsersResponse(
             success=success,

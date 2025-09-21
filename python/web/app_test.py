@@ -30,6 +30,8 @@ engine = create_engine(DATABASE_URL)
 
 create_all_tables(engine)
 
+breakpoint()
+
 
 @pytest.fixture(name="db_session")
 def db_session_fixture():
