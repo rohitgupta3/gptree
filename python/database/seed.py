@@ -42,8 +42,6 @@ def seed_turns(session: Session, user_id: UUID | None = None):
         ],
     ]
 
-    all_turns: dict[str, Turn] = {}
-    column_heads: list[Turn] = []
     prev_turn_by_column: dict[int, Turn] = {}
 
     for col_idx, column in enumerate(conversations):
