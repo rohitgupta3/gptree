@@ -1,13 +1,16 @@
-from fastapi import Depends
+import importlib
+import pkgutil
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from web.app import app, get_session
-from models.user import User  # Assuming you have a models.py file
+from models.metadata import MAIN
+from models.user import User
 
-# Set up the in-memory SQLite database
+# SQLite test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
@@ -32,16 +35,9 @@ app.dependency_overrides[get_session] = override_get_session
 # Create the test client after the dependency is overridden
 client = TestClient(app)
 
-# Create the database tables
-# Base.metadata.create_all(bind=engine)
 
-
-### CREATE
-import importlib
-import pkgutil
-from models.metadata import MAIN
-
-
+# Create test database
+# TODO: DRY this with everywhere else
 def import_modules(package, recursive=True):
     """
     Import all submodules of a module, recursively, including subpackages.
