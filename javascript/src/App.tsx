@@ -490,9 +490,7 @@ function App() {
                   key={conv.identifying_turn_id}
                   style={{ marginBottom: "10px" }}
                 >
-                  <Link
-                    to={`/chat/${conv.root_turn_id}/${conv.identifying_turn_id}`}
-                  >
+                  <Link to={`/chat/${conv.identifying_turn_id}`}>
                     {conv.title || "Untitled"}
                   </Link>
                 </li>
@@ -519,7 +517,7 @@ function App() {
             <Route path="/" element={<Home userData={userData} />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/chat/:conversationId/:turnId" element={<Chat />} />
+            <Route path="/chat/:identifyingTurnId" element={<Chat />} />
           </Routes>
         )}
       </div>
