@@ -477,20 +477,28 @@ function App() {
           }}
         >
           <h3>Conversations</h3>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {conversations.map((conv) => (
-              <li
-                key={conv.identifying_turn_id}
-                style={{ marginBottom: "10px" }}
-              >
-                <Link
-                  to={`/chat/${conv.root_turn_id}/${conv.identifying_turn_id}`}
+          {conversationFetchError ? (
+            <p style={{ color: "red" }}>{conversationFetchError}</p>
+          ) : conversations.length === 0 ? (
+            <p style={{ fontStyle: "italic", color: "#666" }}>
+              No conversations yet.
+            </p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0 }}>
+              {conversations.map((conv) => (
+                <li
+                  key={conv.identifying_turn_id}
+                  style={{ marginBottom: "10px" }}
                 >
-                  {conv.title || "Untitled"}
-                </Link>
-              </li>
-            ))}
-          </ul>
+                  <Link
+                    to={`/chat/${conv.root_turn_id}/${conv.identifying_turn_id}`}
+                  >
+                    {conv.title || "Untitled"}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
