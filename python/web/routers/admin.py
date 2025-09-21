@@ -23,7 +23,7 @@ class StatusResponse(BaseModel):
     message: str
 
 
-class SeedUsersResponse(BaseModel):
+class SeedResponse(BaseModel):
     success: bool
 
 
@@ -106,17 +106,18 @@ def reset_database(session: Session = Depends(get_session)):
         raise HTTPException(status_code=500, detail=f"Reset failed: {e}")
 
 
-@router.post("/seed-users", response_model=SeedUsersResponse)
+@router.post("/seed-users", response_model=SeedResponse)
 def seed_users(session: Session = Depends(get_session)):
     """
     Sync all Firebase users to the database.
     This endpoint can be used to populate the database with existing Firebase users.
     """
     try:
-        success = seed_user(session)
+        _ = seed_user(session)
+        turn_success = seed.seed_turns(session)
 
-        return SeedUsersResponse(
-            success=success,
+        return SeedResponse(
+            success=turn_success,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to seed users: {e}")

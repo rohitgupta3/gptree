@@ -7,7 +7,7 @@ from typing import Optional
 
 
 # TODO: vet this
-def seed_turns(session: Session, user_id: UUID | None = None):
+def seed_turns(session: Session, user_id: UUID | None = None) -> bool:
     if user_id is None:
         user = session.scalars(select(User).where(User.email == "test@test.com")).one()
         user_id = user.id
@@ -76,6 +76,7 @@ def seed_turns(session: Session, user_id: UUID | None = None):
             prev_turn_by_column[col_idx] = turn
 
     session.commit()
+    return True
 
 
 if __name__ == "__main__":
