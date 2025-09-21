@@ -182,10 +182,6 @@ async def read_me(user: CurrentUser = Depends(get_current_user)):
 
 @app.post("/api/user", response_model=UserDataResponse)
 def create_user(payload: CreateUserRequest, session: Session = Depends(get_session)):
-    existing_user = session.exec(select(User).where(User.uid == payload.uid)).first()
-    if existing_user:
-        return UserDataResponse(user_id=str(existing_user.id))
-
     user = User(uid=payload.uid, email=payload.email)
     session.add(user)
     session.commit()

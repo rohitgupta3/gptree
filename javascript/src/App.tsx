@@ -9,6 +9,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 // API host from .env
 const apiHost = import.meta.env.VITE_API_HOST;
 
+// Perhaps synchronize this a bit better with the SQLModel User model
 interface FirebaseUser {
   uid: string;
   email?: string;
@@ -194,6 +195,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   // Firebase auth listener
+  // TODO: confirm this works if you manually clear cookies
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {

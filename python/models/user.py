@@ -28,6 +28,6 @@ class User(SQLModel, table=True):
         )
     )
 
-    uid: str
-    email: str
+    uid: str = Field(unique=True)
+    email: str = Field(unique=True)
     # TODO: name, etc
