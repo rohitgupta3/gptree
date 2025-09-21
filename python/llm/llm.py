@@ -11,7 +11,7 @@ client = genai.Client()  # will read GEMINI_API_KEY automatically
 # TODO: abstract
 MODEL = "gemini-2.5-flash-lite"
 
-USE_GEMINI = os.environ["USE_GEMINI"] == "1"
+USE_GEMINI = os.environ.get("USE_GEMINI", "0") == "1"
 
 
 def gemini_with_fallback(
