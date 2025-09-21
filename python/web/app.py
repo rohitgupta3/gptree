@@ -4,13 +4,13 @@ import os
 import pkgutil
 from typing import Any
 
-from fastapi import FastAPI, Depends, HTTPException, Request, status
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import inspect
-from sqlmodel import Session, select, SQLModel
+from sqlmodel import Session, select
 from pydantic import BaseModel
 from uuid import UUID
 import firebase_admin
