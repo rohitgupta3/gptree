@@ -58,3 +58,36 @@ def get_full_conversation_from_turn_id(
         current = next_turn
 
     return earlier
+
+
+def reply_to_turn(
+    session: Session,
+    user_id: UUID,
+    parent_turn_id: UUID,
+    text: str,
+) -> Turn:
+    prev_turn = session.get(Turn, parent_turn_id)
+
+    if not prev_turn or prev_turn.user_id != user_id:
+        raise ValueError("Invalid turn or unauthorized")
+
+    # Create the reply turn
+    new_turn = Turn(
+        user_id=user_id,
+        human_text=text,
+        model="gemini-2.5-flash",
+        title=prev_turn.title,
+        parent_id=prev_turn.id,
+        bot_text=None,
+    )
+
+    session.add(new_turn)
+    session.commit()
+    session.refresh(new_turn)
+
+    # Update prev_turn to point to new_turn
+    prev_turn.primary_child_id = new_turn.id
+    session.add(prev_turn)
+    session.commit()
+
+    return new_turn
