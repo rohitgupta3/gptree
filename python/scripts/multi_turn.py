@@ -18,15 +18,6 @@ def main():
     print("-" * 50)
 
     try:
-        # history = [
-        #     {"role": "user", "parts": ["Who won the World Cup in 2018?"]},
-        #     {"role": "model", "parts": ["France won the 2018 FIFA World Cup."]},
-        #     {"role": "user", "parts": ["Who was the captain?"]},
-        #     {
-        #         "role": "model",
-        #         "parts": ["Hugo Lloris was the captain of the French team."],
-        #     },
-        # ]
         history = [
             {"role": "user", "parts": [{"text": "Who won the World Cup in 2018?"}]},
             {
@@ -49,7 +40,6 @@ def main():
 
         # Initialize the client and chat
         client = genai.Client()
-        # chat = client.chats.create(model="gemini-2.5-flash", history=history)
         chat = client.chats.create(model="gemini-2.5-flash", history=history)
 
         while True:
