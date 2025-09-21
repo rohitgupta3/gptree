@@ -50,7 +50,6 @@ function Home({
   userData: FirebaseUser | null;
   onNewConversation?: () => void;
 }) {
-  const [count, setCount] = useState(0);
   const [conversationText, setConversationText] = useState("");
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const navigate = useNavigate();
