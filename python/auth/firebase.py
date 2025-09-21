@@ -2,8 +2,15 @@ import base64
 import os
 from typing import Any
 
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import firebase_admin
 from firebase_admin import auth as fb_auth, credentials
+
+# TODO: remove from web
+from web.schemas.user import CurrentUser
+
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def authenticate():
@@ -37,3 +44,51 @@ def authenticate():
 
 def verify_firebase_token(token: str) -> dict[str, Any]:
     return fb_auth.verify_id_token(token)
+
+
+# TODO: try to remove async/await
+# TODO: if this is FastAPI-coupled, figure out better organization
+async def get_current_user(
+    creds: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+) -> CurrentUser:
+    if not creds or creds.scheme.lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        decoded = verify_firebase_token(creds.credentials)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid Firebase ID token: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    reserved = {
+        "aud",
+        "auth_time",
+        "exp",
+        "firebase",
+        "iat",
+        "iss",
+        "sub",
+        "uid",
+        "user_id",
+        "email",
+        "email_verified",
+        "name",
+        "picture",
+    }
+    custom_claims = {k: v for k, v in decoded.items() if k not in reserved}
+
+    return CurrentUser(
+        uid=decoded.get("uid") or decoded.get("user_id"),
+        email=decoded.get("email"),
+        name=decoded.get("name"),
+        picture=decoded.get("picture"),
+        email_verified=decoded.get("email_verified"),
+        claims=custom_claims,
+    )

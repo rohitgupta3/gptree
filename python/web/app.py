@@ -2,7 +2,6 @@ import os
 from typing import Any
 
 from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -13,26 +12,26 @@ from uuid import UUID
 from auth.firebase import (
     verify_firebase_token,
     authenticate as authenticate_to_firebase,
+    get_current_user,
 )
 from models.user import User
 from models.turn import Turn
 from database.database import get_session
 from llm.llm import _stub_gemini
 from web.routers import admin
+from web.schemas.user import CurrentUser
 
 
 authenticate_to_firebase()
 
-bearer_scheme = HTTPBearer(auto_error=False)
 
-
-class CurrentUser(BaseModel):
-    uid: str
-    email: str
-    name: str | None = None
-    picture: str | None = None
-    email_verified: bool | None = None
-    claims: dict[str, Any] = {}
+# class CurrentUser(BaseModel):
+#     uid: str
+#     email: str
+#     name: str | None = None
+#     picture: str | None = None
+#     email_verified: bool | None = None
+#     claims: dict[str, Any] = {}
 
 
 class CreateUserRequest(BaseModel):
@@ -50,52 +49,6 @@ class CreateConversationResponse(BaseModel):
 
 class UserDataResponse(BaseModel):
     user_id: str
-
-
-async def get_current_user(
-    creds: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-) -> CurrentUser:
-    if not creds or creds.scheme.lower() != "bearer":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing bearer token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    try:
-        decoded = verify_firebase_token(creds.credentials)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid Firebase ID token: {str(e)}",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    reserved = {
-        "aud",
-        "auth_time",
-        "exp",
-        "firebase",
-        "iat",
-        "iss",
-        "sub",
-        "uid",
-        "user_id",
-        "email",
-        "email_verified",
-        "name",
-        "picture",
-    }
-    custom_claims = {k: v for k, v in decoded.items() if k not in reserved}
-
-    return CurrentUser(
-        uid=decoded.get("uid") or decoded.get("user_id"),
-        email=decoded.get("email"),
-        name=decoded.get("name"),
-        picture=decoded.get("picture"),
-        email_verified=decoded.get("email_verified"),
-        claims=custom_claims,
-    )
 
 
 app = FastAPI(title="Simple User Project API")

@@ -33,7 +33,6 @@ class Turn(SQLModel, table=True):
     )
 
     parent_id: UUID | None
-    # children_turn_ids: list[UUID]
     primary_child_id: UUID | None
     branched_child_ids: list[UUID] = Field(
         sa_type=postgresql.ARRAY(sqlalchemy_utils.UUIDType),

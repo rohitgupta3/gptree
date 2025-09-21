@@ -5,9 +5,15 @@ from sqlmodel import Session, select
 from sqlalchemy import inspect
 from pydantic import BaseModel
 
+from database import seed
 from database.database import create_all_tables, get_session
 from models.user import User
-
+from auth.firebase import (
+    verify_firebase_token,
+    authenticate as authenticate_to_firebase,
+    get_current_user,
+)
+from web.schemas.user import CurrentUser
 
 router = APIRouter(prefix="/api", tags=["admin"])
 
@@ -59,6 +65,25 @@ def seed_user(session: Session) -> bool:
     except Exception as e:
         print(f"Exception hit, rolling back: {e}")
         session.rollback()
+        return False
+
+
+@router.post("/seed-turns")
+def seed_turns(
+    current_user: CurrentUser = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> bool:
+    """
+    Fetch all users from Firebase and sync them to the database.
+    Returns True if it succeeded
+    """
+
+    try:
+        # user_id = session.scalars(select(User).)
+        seed.seed_turns(session)
+        return True
+    except Exception as e:
+        print(e)
         return False
 
 
