@@ -17,6 +17,7 @@ from auth.firebase import (
 from models.user import User
 from models.turn import Turn
 from database import get_session
+from llm.llm import _stub_gemini
 from web.routers import admin
 
 
@@ -45,6 +46,10 @@ class CreateConversationRequest(BaseModel):
 
 class CreateConversationResponse(BaseModel):
     turn_id: UUID
+
+
+class UserDataResponse(BaseModel):
+    user_id: str
 
 
 async def get_current_user(
@@ -93,25 +98,6 @@ async def get_current_user(
     )
 
 
-def _stub_gemini(session: Session, turn_id: UUID) -> None:
-    """
-    Stub function for Gemini API interaction.
-    In the real implementation, this would call the actual Gemini API.
-    """
-    # Get the turn to access the human text
-    turn = session.get(Turn, turn_id)
-    if not turn:
-        raise ValueError(f"Turn {turn_id} not found")
-
-    # Generate a simple response based on the human input
-    bot_response = f"I see that you said {turn.human_text}"
-
-    # Update the turn with the bot response
-    turn.bot_text = bot_response
-    session.add(turn)
-    session.commit()
-
-
 app = FastAPI(title="Simple User Project API")
 
 
@@ -129,10 +115,6 @@ app.add_middleware(
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
-
-
-class UserDataResponse(BaseModel):
-    user_id: str
 
 
 @app.get("/.health")
@@ -187,7 +169,6 @@ async def create_conversation(
 
     try:
         # Call the Gemini stub to generate a response
-        # TODO: explore removing async/await here
         _stub_gemini(session, turn_id)
     except Exception as e:
         # If the stub fails, we should still return the turn ID
