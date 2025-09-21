@@ -1,17 +1,13 @@
 import datetime
 import os
-from typing import Any
 from uuid import UUID
 
 from auth.firebase import (
     authenticate as authenticate_to_firebase,
 )
-from auth.firebase import (
-    get_current_user,
-    verify_firebase_token,
-)
+from auth.firebase import get_current_user
 from database.database import get_session
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles

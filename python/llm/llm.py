@@ -8,7 +8,7 @@ from web.dao import conversations
 
 client = genai.Client()  # will read GEMINI_API_KEY automatically
 
-# TODO: abstract
+# TODO: abstract the model
 MODEL = "gemini-2.5-flash-lite"
 
 USE_GEMINI = os.environ.get("USE_GEMINI", "0") == "1"
@@ -30,7 +30,6 @@ def gemini_with_fallback(
 def gemini_with_history(
     session: Session, turn_id: UUID, *, create_title: bool = False
 ) -> None:
-    # Get the turn to access the human text
     turn = session.get(Turn, turn_id)
     if not turn:
         raise ValueError(f"Turn {turn_id} not found")
@@ -60,7 +59,7 @@ def gemini_with_history(
     chat = client.chats.create(model=MODEL, history=history)
     response = chat.send_message(turn.human_text)
     turn.bot_text = response.text
-    # Don't think we need this
+    # Don't think we need `add`
     session.add(turn)
     session.commit()
 
@@ -79,7 +78,6 @@ def gemini_with_history(
 def gemini_fallback(
     session: Session, turn_id: UUID, *, create_title: bool = False
 ) -> None:
-    # Get the turn to access the human text
     turn = session.get(Turn, turn_id)
     if not turn:
         raise ValueError(f"Turn {turn_id} not found")
@@ -98,23 +96,14 @@ def gemini(session: Session, turn_id: UUID) -> None:
     Stub function for Gemini API interaction.
     In the real implementation, this would call the actual Gemini API.
     """
-    # Get the turn to access the human text
     turn = session.get(Turn, turn_id)
     if not turn:
         raise ValueError(f"Turn {turn_id} not found")
 
-    # Generate a simple response based on the human input
-    # bot_response = f"I see that you said {turn.human_text}"
-
     resp = client.models.generate_content(
         model=MODEL,
-        # contents="Write a concise checklist for preparing a coffee shop for opening.",
         contents=turn.human_text,
     )
-
-    # # The SDK returns an object with .text (human text) and more metadata
-    # print("=== GENERATED TEXT ===")
-    # print(resp.text)
 
     # Update the turn with the bot response
     turn.bot_text = resp.text
