@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 
 from sqlmodel import Session
@@ -11,7 +12,7 @@ client = genai.Client()  # will read GEMINI_API_KEY automatically
 # TODO: abstract
 MODEL = "gemini-2.5-flash-lite"
 
-USE_GEMINI = False
+USE_GEMINI = os.environ["USE_GEMINI"] == "1"
 
 
 def gemini_with_fallback(session: Session, turn_id: UUID) -> None:
