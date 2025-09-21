@@ -141,10 +141,7 @@ function Home({
                   type="submit"
                   disabled={!conversationText.trim() || isCreatingConversation}
                   style={{
-                    backgroundColor:
-                      isCreatingConversation || !conversationText.trim()
-                        ? "#6c757d"
-                        : "#007bff",
+                    backgroundColor: "#6c757d",
                     color: "white",
                     padding: "10px 20px",
                     border: "none",
@@ -154,6 +151,10 @@ function Home({
                         ? "not-allowed"
                         : "pointer",
                     fontSize: "16px",
+                    opacity:
+                      isCreatingConversation || !conversationText.trim()
+                        ? 0.6
+                        : 1,
                   }}
                 >
                   {isCreatingConversation
@@ -325,8 +326,7 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
                 type="submit"
                 disabled={!replyText.trim() || isReplying}
                 style={{
-                  backgroundColor:
-                    isReplying || !replyText.trim() ? "#6c757d" : "#007bff",
+                  backgroundColor: "#6c757d",
                   color: "white",
                   padding: "10px 20px",
                   border: "none",
@@ -334,6 +334,7 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
                   cursor:
                     isReplying || !replyText.trim() ? "not-allowed" : "pointer",
                   fontSize: "16px",
+                  opacity: isReplying || !replyText.trim() ? 0.6 : 1,
                 }}
                 onClick={() => setReplyMode("reply")}
               >
@@ -346,8 +347,7 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
                 type="submit"
                 disabled={!replyText.trim() || isReplying}
                 style={{
-                  backgroundColor:
-                    isReplying || !replyText.trim() ? "#6c757d" : "#17a2b8",
+                  backgroundColor: "#6c757d",
                   color: "white",
                   padding: "10px 20px",
                   border: "none",
@@ -355,6 +355,7 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
                   cursor:
                     isReplying || !replyText.trim() ? "not-allowed" : "pointer",
                   fontSize: "16px",
+                  opacity: isReplying || !replyText.trim() ? 0.6 : 1,
                 }}
                 onClick={() => setReplyMode("branch")}
               >
@@ -366,21 +367,6 @@ function Chat({ onNewConversation }: { onNewConversation?: () => void }) {
           </form>
         </>
       )}
-
-      <button
-        onClick={() => navigate("/")}
-        style={{
-          backgroundColor: "#6c757d",
-          color: "white",
-          padding: "10px 20px",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-          marginTop: "20px",
-        }}
-      >
-        Back to Home
-      </button>
     </div>
   );
 }
@@ -547,123 +533,87 @@ function App() {
     }
   };
 
+  const buttonStyle = {
+    backgroundColor: "#6c757d",
+    color: "white",
+    padding: "8px 16px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "14px",
+    textDecoration: "none" as const,
+    display: "inline-block" as const,
+  };
+
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
+      {/* Top Header */}
       <div
         style={{
-          position: "absolute",
+          position: "fixed",
           top: 0,
           left: 0,
-          width: "100%",
+          right: 0,
+          height: "60px",
+          backgroundColor: "#f8f9fa",
+          borderBottom: "1px solid #dee2e6",
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          padding: "20px",
+          justifyContent: "space-between",
+          padding: "0 20px",
           zIndex: 1000,
         }}
       >
-        {/* Admin buttons on the left */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            onClick={handleResetDatabase}
-            style={{
-              backgroundColor: "#ffc107",
-              color: "black",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
+        {/* Left: Home button */}
+        <Link to="/" style={buttonStyle}>
+          Home
+        </Link>
+
+        {/* Center: Admin buttons (positioned to the right of sidebar) */}
+        <div
+          style={{
+            position: "absolute",
+            left: "270px", // 250px sidebar width + 20px margin
+            display: "flex",
+            gap: "10px",
+          }}
+        >
+          <button onClick={handleResetDatabase} style={buttonStyle}>
             Reset DB
           </button>
-          <button
-            onClick={handleResetTestDatabase}
-            style={{
-              backgroundColor: "#ffc107",
-              color: "black",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
+          <button onClick={handleResetTestDatabase} style={buttonStyle}>
             Reset test DB
           </button>
-          <button
-            onClick={handleSeedUsers}
-            style={{
-              backgroundColor: "#28a745",
-              color: "white",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
+          <button onClick={handleSeedUsers} style={buttonStyle}>
             Seed Users
           </button>
         </div>
 
-        {/* Auth buttons on the right */}
-        <div style={{ display: "flex", gap: "10px" }}>
+        {/* Right: Auth buttons */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {userData ? (
             <>
               {userData.email && (
                 <span
                   style={{
                     fontSize: "14px",
-                    color: "#333",
-                    fontStyle: "italic",
+                    color: "#6c757d",
+                    fontWeight: "500",
                   }}
                 >
                   {userData.email}
                 </span>
               )}
-              <button
-                onClick={handleLogout}
-                style={{
-                  backgroundColor: "#dc3545",
-                  color: "white",
-                  padding: "8px 16px",
-                  borderRadius: "4px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                }}
-              >
+              <button onClick={handleLogout} style={buttonStyle}>
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                style={{
-                  backgroundColor: "#6c757d",
-                  color: "white",
-                  padding: "8px 16px",
-                  textDecoration: "none",
-                  borderRadius: "4px",
-                  fontSize: "14px",
-                }}
-              >
+              <Link to="/login" style={buttonStyle}>
                 Login
               </Link>
-              <Link
-                to="/signup"
-                style={{
-                  backgroundColor: "#007bff",
-                  color: "white",
-                  padding: "8px 16px",
-                  textDecoration: "none",
-                  borderRadius: "4px",
-                  fontSize: "14px",
-                }}
-              >
+              <Link to="/signup" style={buttonStyle}>
                 Sign Up
               </Link>
             </>
@@ -671,6 +621,7 @@ function App() {
         </div>
       </div>
 
+      {/* Left Sidebar */}
       <div
         style={{
           position: "fixed",
@@ -678,51 +629,80 @@ function App() {
           left: 0,
           width: "250px",
           height: "calc(100% - 60px)",
-          backgroundColor: "#f1f1f1",
+          backgroundColor: "#f8f9fa",
           padding: "20px",
           overflowY: "auto",
-          borderRight: "1px solid #ccc",
+          borderRight: "1px solid #dee2e6",
         }}
       >
-        <h3>Conversations</h3>
+        {/* New Chat button */}
+        <Link
+          to="/"
+          style={{
+            ...buttonStyle,
+            display: "block",
+            textAlign: "center" as const,
+            marginBottom: "20px",
+            width: "100%",
+            boxSizing: "border-box" as const,
+          }}
+        >
+          New Chat
+        </Link>
+
+        <h3 style={{ margin: "0 0 15px 0", color: "#495057" }}>Chats</h3>
 
         {!userData ? (
-          <p style={{ fontStyle: "italic", color: "#666" }}>
+          <p
+            style={{ fontStyle: "italic", color: "#6c757d", fontSize: "14px" }}
+          >
             Please log in to see your chats.
           </p>
         ) : conversationFetchError ? (
-          <p style={{ color: "red" }}>{conversationFetchError}</p>
+          <p style={{ color: "#dc3545", fontSize: "14px" }}>
+            {conversationFetchError}
+          </p>
         ) : conversations.length === 0 ? (
-          <p style={{ fontStyle: "italic", color: "#666" }}>
+          <p
+            style={{ fontStyle: "italic", color: "#6c757d", fontSize: "14px" }}
+          >
             No conversations yet.
           </p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {conversations.map((conv) => (
               <li
                 key={conv.identifying_turn_id}
-                style={{ marginBottom: "10px" }}
+                style={{ marginBottom: "8px" }}
               >
                 <Link
                   to={`/chat/${conv.identifying_turn_id}`}
                   style={{
                     display: "block",
-                    padding: "8px",
+                    padding: "10px 12px",
                     borderRadius: "4px",
                     textDecoration: "none",
-                    color: "black",
+                    color: "#495057",
                     backgroundColor:
                       conv.identifying_turn_id === currentTurnId
-                        ? "#d0e7ff"
+                        ? "#e3f2fd"
                         : "transparent",
                     border:
                       conv.identifying_turn_id === currentTurnId
-                        ? "2px solid #007bff"
+                        ? "1px solid #90caf9"
                         : "1px solid transparent",
-                    fontWeight:
-                      conv.identifying_turn_id === currentTurnId
-                        ? "bold"
-                        : "normal",
+                    fontSize: "14px",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (conv.identifying_turn_id !== currentTurnId) {
+                      e.currentTarget.style.backgroundColor = "#f1f3f4";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (conv.identifying_turn_id !== currentTurnId) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
                   }}
                 >
                   {conv.title || "Untitled"}
