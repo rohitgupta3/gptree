@@ -1,4 +1,3 @@
-import base64
 import os
 from typing import Any
 
@@ -10,8 +9,6 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, select
 from pydantic import BaseModel
 from uuid import UUID
-import firebase_admin
-from firebase_admin import auth as fb_auth, credentials
 
 from auth.firebase import (
     verify_firebase_token,
@@ -22,32 +19,7 @@ from models.turn import Turn
 from database import get_session
 from web.routers import admin
 
-# project_id = os.getenv("FIREBASE_PROJECT_ID")
-# client_email = os.getenv("FIREBASE_CLIENT_EMAIL")
-# private_key_b64 = os.getenv("FIREBASE_PRIVATE_KEY_BASE64")
 
-# if not project_id or not client_email or not private_key_b64:
-#     raise RuntimeError("Missing required Firebase environment variables")
-
-# # Decode the base64 private key
-# private_key = base64.b64decode(private_key_b64).decode("utf-8")
-
-# if not firebase_admin._apps:
-#     cred = credentials.Certificate(
-#         {
-#             "type": "service_account",
-#             "project_id": project_id,
-#             "private_key_id": "dummy",  # not strictly used in verification
-#             "private_key": private_key,
-#             "client_email": client_email,
-#             "client_id": "dummy",
-#             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-#             "token_uri": "https://oauth2.googleapis.com/token",
-#             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-#             "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{client_email}",
-#         }
-#     )
-#     firebase_admin.initialize_app(cred)
 authenticate_to_firebase()
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -75,17 +47,6 @@ class CreateConversationResponse(BaseModel):
     turn_id: UUID
 
 
-# def verify_firebase_token(token: str) -> dict[str, Any]:
-#     try:
-#         return fb_auth.verify_id_token(token)
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail=f"Invalid Firebase ID token: {str(e)}",
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
-
-
 async def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(bearer_scheme),
 ) -> CurrentUser:
@@ -96,7 +57,6 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # decoded = verify_firebase_token(creds.credentials)
     try:
         decoded = verify_firebase_token(creds.credentials)
     except Exception as e:
