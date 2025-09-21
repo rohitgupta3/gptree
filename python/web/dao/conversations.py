@@ -3,18 +3,19 @@ from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from models.turn import Turn  # Adjust import as needed
 
+from sqlalchemy import func, any_
+
 
 def get_separable_conversations(session: Session) -> list[Turn]:
     TurnAlias = aliased(Turn)
 
-    # Subquery: joins each turn with its parent
     stmt = (
         select(Turn)
         .outerjoin(TurnAlias, Turn.parent_id == TurnAlias.id)
         .where(
             or_(
                 Turn.parent_id == None,  # noqa: E711
-                func.coalesce(TurnAlias.branched_child_ids, []).contains([Turn.id]),
+                Turn.id == any_(TurnAlias.branched_child_ids),
             )
         )
         .order_by(Turn.created_at.desc())

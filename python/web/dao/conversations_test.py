@@ -42,7 +42,7 @@ def db_session_fixture():
         connection.close()
 
 
-def test_create_user(db_session: Session):
+def test_separable_conversation(db_session: Session):
     user = User(uid="test_uid_123", email="test@example.com")
     db_session.add(user)
     db_session.commit()
