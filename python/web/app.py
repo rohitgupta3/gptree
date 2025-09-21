@@ -222,6 +222,7 @@ async def create_conversation(
 
     try:
         # Call the Gemini stub to generate a response
+        # TODO: explore removing async/await here
         await _stub_gemini(session, turn_id)
     except Exception as e:
         # If the stub fails, we should still return the turn ID
