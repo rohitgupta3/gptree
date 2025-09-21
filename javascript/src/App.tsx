@@ -186,6 +186,43 @@ function Chat() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [isReplying, setIsReplying] = useState(false);
+
+  const handleReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyText.trim() || turns.length === 0) return;
+
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      setIsReplying(true);
+      const token = await user.getIdToken();
+      const res = await fetch(`${apiHost}/api/conversation/reply`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          parent_turn_id: turns[turns.length - 1].id,
+          text: replyText,
+        }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const newTurn: Turn = await res.json();
+      setTurns((prev) => [...prev, newTurn]);
+      setReplyText("");
+    } catch (err) {
+      console.error("Failed to reply:", err);
+      alert("Failed to send reply.");
+    } finally {
+      setIsReplying(false);
+    }
+  };
 
   useEffect(() => {
     const fetchConversation = async () => {
@@ -250,6 +287,43 @@ function Chat() {
               )}
             </div>
           ))}
+          <form onSubmit={handleReply} style={{ marginTop: "20px" }}>
+            <textarea
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder="Type your reply..."
+              rows={3}
+              cols={50}
+              style={{
+                width: "100%",
+                maxWidth: "600px",
+                padding: "10px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+                fontSize: "14px",
+                fontFamily: "inherit",
+              }}
+              disabled={isReplying}
+            />
+            <br />
+            <button
+              type="submit"
+              disabled={!replyText.trim() || isReplying}
+              style={{
+                backgroundColor:
+                  isReplying || !replyText.trim() ? "#6c757d" : "#28a745",
+                color: "white",
+                padding: "10px 20px",
+                border: "none",
+                borderRadius: "4px",
+                cursor:
+                  isReplying || !replyText.trim() ? "not-allowed" : "pointer",
+                fontSize: "16px",
+              }}
+            >
+              {isReplying ? "Replying..." : "Send Reply"}
+            </button>
+          </form>
         </>
       )}
 

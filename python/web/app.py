@@ -22,7 +22,7 @@ from llm.llm import _stub_gemini
 from web.routers import admin
 from web.schemas.user import CurrentUser
 from web.dao import conversations
-from web.dao.conversations import get_full_conversation_from_turn_id
+from web.dao.conversations import get_full_conversation_from_turn_id, reply_to_turn
 from web.schemas.turn import TurnResponse  # adjust import if defined elsewhere
 
 
@@ -51,6 +51,11 @@ class ConversationListItem(BaseModel):
     identifying_turn_id: UUID
     title: str
     created_at: datetime.datetime
+
+
+class ReplyRequest(BaseModel):
+    parent_turn_id: UUID
+    text: str
 
 
 app = FastAPI(title="Simple User Project API")
@@ -172,6 +177,32 @@ def get_conversation_by_turn_id(
         raise HTTPException(status_code=404, detail="Conversation not found")
 
     return full_convo
+
+
+@app.post("/api/conversation/reply", response_model=TurnResponse)
+def reply_to_conversation(
+    payload: ReplyRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    user = session.exec(select(User).where(User.uid == current_user.uid)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_turn = reply_to_turn(
+        session=session,
+        user_id=user.id,
+        parent_turn_id=payload.parent_turn_id,
+        text=payload.text,
+    )
+
+    # Optional: call Gemini stub to populate bot_text
+    try:
+        _stub_gemini(session, new_turn.id)
+    except Exception as e:
+        print(f"Stub failed: {e}")
+
+    return new_turn
 
 
 app.include_router(admin.router)
