@@ -29,6 +29,7 @@ logger.setLevel(logging.INFO)
 authenticate_to_firebase()
 
 
+# TODO: move these into schemas
 class CreateUserRequest(BaseModel):
     uid: str
     email: str
